@@ -1,23 +1,20 @@
 import React from "react";
 
-function App() {
+import { MediaQueries } from "./commonUtils/mediaQuery";
+import { Chat } from "./components/chat/Chat";
+
+const mediaQueries = new MediaQueries();
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    mediaQueries.isMobile ? (
+      <Chat />
+    ) : (
+      <div>
+        PLEASE OPEN ON MOBILE
+      </div>
+    )
+  )
 }
 
 export default App;

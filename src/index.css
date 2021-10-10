@@ -1,3 +1,15 @@
+@font-face {
+  font-family: "roboto";
+  src: url("fonts/Roboto/Roboto-Regular.ttf");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "roboto";
+  src: url("fonts/Roboto/Roboto-Bold.ttf");
+  font-weight: bold;
+}
+
 div,
 span,
 h1,
@@ -14,13 +26,8 @@ textarea {
 body {
   overflow-x: hidden;
   background: #f6f6f6;
-  font-family: "mapleStory";
+  font-family: "roboto";
   font-weight: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
 }
