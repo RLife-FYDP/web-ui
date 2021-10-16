@@ -31,6 +31,14 @@ export class NotificationBarViewState {
         taskType: TaskType.EXPENSE,
         numNotificationsMissed: 4,
       },
+      {
+        taskType: TaskType.EXPENSE,
+        numNotificationsMissed: 4,
+      },
+      {
+        taskType: TaskType.EXPENSE,
+        numNotificationsMissed: 4,
+      },
     ];
   }
 

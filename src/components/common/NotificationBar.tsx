@@ -2,10 +2,14 @@ import { observable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import styled from "styled-components";
-import COLORS from "../../commonUtils/colors";
-import { NotificationBarViewState } from "./NotificationBarViewState";
 
+import COLORS from "../../commonUtils/colors";
 import WaveHandIcon from "../../icons/WaveHandIcon.svg";
+import ChatBubbleIcon from "../../icons/ChatBubbleIcon.svg";
+
+import { NotificationBarViewState, TaskType } from "./NotificationBarViewState";
+
+import { NotificationBubble } from "../notifications/NotificationBubble";
 
 @observer
 export class NotificationBar extends React.Component {
@@ -21,6 +25,23 @@ export class NotificationBar extends React.Component {
           <Icon src={WaveHandIcon} />
         </Header>
         <Caption>Here's what you've missed!</Caption>
+        <NotificationsContainer>
+          {this.notifications.testData.map((data) => {
+            switch (data.taskType) {
+              // case TaskType.ACHIEVEMENT:
+              //   return "hello";
+              default:
+                return (
+                  <NotificationBubble
+                    backgroundColor={COLORS.SkyBlue}
+                    numNotifications={4}
+                    notificationType="Expenses"
+                    icon={ChatBubbleIcon}
+                  />
+                );
+            }
+          })}
+        </NotificationsContainer>
       </Container>
     );
   }
@@ -43,4 +64,13 @@ const Caption = styled.p`
 
 const Icon = styled.img`
   padding: 0 4px;
+`;
+
+const NotificationsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 12px;
 `;
