@@ -54,13 +54,15 @@ export class NotificationBar extends React.Component<NotificationBarProps> {
 
 const Container = styled.div`
   position: relative;
-  border: 1px solid ${COLORS.Black};
+  width: calc(100% - 16px);
   margin: 8px;
   padding: 16px;
+  border: 1px solid ${COLORS.Black};
+  user-select: none;
 `;
 
 const Header = styled.h1`
-  font-size: 16px;
+  font-size: 14px;
 `;
 
 const Caption = styled.p`
@@ -72,13 +74,15 @@ const Icon = styled.img`
   padding: 0 4px;
 `;
 
+// TODO: fix horizontal scroll?
 const NotificationsContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: left;
-  flex-wrap: wrap;
   align-items: center;
   margin-top: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 `;
 
 const CloseContainer = styled.div`

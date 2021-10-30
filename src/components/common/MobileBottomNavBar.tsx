@@ -114,7 +114,7 @@ const NavigationContainer = styled.div`
   align-items: center;
   width: calc(100% - 16px);
   bottom: 0;
-  margin: 16px 8px;
+  padding: 8px;
   background: ${COLORS.White}
 `;
 

@@ -20,7 +20,7 @@ export const NotificationBubble: React.FC<NotificationBubbleProps> = ({
     <Container backgroundColor={backgroundColor}
       onClick={onClickHandler}
     >
-      <IconContainer src={icon} />
+      <IconContainer src={icon} draggable={false} />
       {numNotifications} new {notificationType}
     </Container>
   );
@@ -42,6 +42,7 @@ const Container = styled.div<{
   background: ${({ backgroundColor }) => backgroundColor};
   border-radius: 25px;
   font-size: 14px;
+  user-select: none;
 `;
 
 const IconContainer = styled.img`
