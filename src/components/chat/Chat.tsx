@@ -9,8 +9,6 @@ export class Chat extends React.Component {
   render() {
     return (
       <>
-        <MobileTopNavBar />
-        <NotificationBar />
         <div>CHAT PAGE</div>
       </>
     );

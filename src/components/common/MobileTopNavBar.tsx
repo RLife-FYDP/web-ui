@@ -17,7 +17,7 @@ const Container = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin: 16px;
+  margin: 16px 8px;
   height: 48px;
 `;
 

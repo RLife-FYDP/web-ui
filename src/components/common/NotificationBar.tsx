@@ -8,17 +8,22 @@ import WaveHandIcon from "../../icons/WaveHandIcon.svg";
 import ChatBubbleIcon from "../../icons/ChatBubbleIcon.svg";
 
 import { NotificationBarViewState, TaskType } from "./NotificationBarViewState";
-
 import { NotificationBubble } from "../notifications/NotificationBubble";
 
+interface NotificationBarProps {
+  onClickTaskType?: (taskType: TaskType) => void;
+  onClickClose?: () => void;
+}
+
 @observer
-export class NotificationBar extends React.Component {
+export class NotificationBar extends React.Component<NotificationBarProps> {
   @observable
   private notifications = new NotificationBarViewState();
 
   render() {
     return (
       <Container>
+        <CloseContainer onClick={this.props.onClickClose}>x</CloseContainer>
         <Header>
           Welcome back to {this.notifications.roomName},{" "}
           {this.notifications.testName}
@@ -48,6 +53,7 @@ export class NotificationBar extends React.Component {
 }
 
 const Container = styled.div`
+  position: relative;
   border: 1px solid ${COLORS.Black};
   margin: 8px;
   padding: 16px;
@@ -74,3 +80,9 @@ const NotificationsContainer = styled.div`
   align-items: center;
   margin-top: 12px;
 `;
+
+const CloseContainer = styled.div`
+  position: absolute;
+  right: 8px;
+  top: 8px;
+`
