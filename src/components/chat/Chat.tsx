@@ -13,12 +13,34 @@ export class Chat extends React.Component {
   @observable
   private viewState = new ChatViewState();
 
-  render() {
+  renderOverview() {
+    return (
+      <AllChatsContainer>
+        {this.viewState.testData.map((data, i) => (
+          <ChatContainer
+            onClick={() => {
+              this.viewState.expandChat(i);
+            }}
+          >
+            <ChatIcon />
+            <MessageContainer>
+              <ChatHead>{data.recipantName}</ChatHead>
+              <ChatMessage>{data.lastText}</ChatMessage>
+            </MessageContainer>
+          </ChatContainer>
+        ))}
+      </AllChatsContainer>
+    );
+  }
+
+  renderSingleChat() {
     return (
       <Container>
-        <ContactNameContainer>Marcus Yung</ContactNameContainer>
+        <ContactNameContainer>
+          <GoBackContainer onClick={this.viewState.showChatOverview}>{"<"}</GoBackContainer>Marcus Yung
+        </ContactNameContainer>
         <ConversationContainer>
-          {this.viewState.testData.map((data) => (
+          {this.viewState.testSingleData.map((data) => (
             <ChatBubble
               alignment={
                 data.senderId === "0" ? Alignment.LEFT : Alignment.RIGHT
@@ -30,12 +52,55 @@ export class Chat extends React.Component {
 
         <MessageSenderContainer>
           <MessageInput />
-          <SendIcon onClick={this.viewState.sendMessage}/>
+          <SendIcon onClick={this.viewState.sendMessage} />
         </MessageSenderContainer>
       </Container>
     );
   }
+
+  render() {
+    return (
+      <>
+        {this.viewState.showSingleChat
+          ? this.renderSingleChat()
+          : this.renderOverview()}
+      </>
+    );
+  }
 }
+
+const AllChatsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  margin: 8px;
+`;
+const ChatContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 8px 0;
+`;
+const MessageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: 45px;
+`;
+
+const ChatHead = styled.h3``;
+
+//TODO: convert to image later
+const ChatIcon = styled.div`
+  width: 50px;
+  height: 50px;
+  margin-right: 16px;
+  border-radius: 50%;
+  background: ${COLORS.SkyBlue};
+`;
+
+const ChatMessage = styled.p``;
 
 const Container = styled.div`
   display: flex;
@@ -45,7 +110,17 @@ const Container = styled.div`
   margin: 8px;
 `;
 
+const GoBackContainer = styled.p`
+  padding-right: 8px;
+  cursor: default;
+  color: ${COLORS.Gray};
+`;
+
 const ContactNameContainer = styled.h2`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
   margin: 8px 0;
 `;
 

@@ -10,7 +10,6 @@ import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { Achievements } from "../achievements/Achievements";
 import { Canvas } from "../canvas/Canvas";
-import { Chat } from "../chat/Chat";
 import { Expenses } from "../expenses/Expenses";
 import { Tasks } from "../tasks/Tasks";
 import { MobileTopNavBar } from "../common/MobileTopNavBar";
@@ -21,6 +20,7 @@ import { ReactComponent as ChatIcon } from "../../icons/ChatMainIcon.svg";
 import { ReactComponent as TaskIcon } from "../../icons/TaskMainIcon.svg";
 import { ReactComponent as WhiteboardIcon } from "../../icons/WhiteboardMainIcon.svg";
 import { ReactComponent as ExpenseIcon } from "../../icons/ExpenseMainIcon.svg";
+import { Chat } from "../chat/Chat";
 
 export const MobileBottomNavBar: React.FC = () => {
   const NavigationRouter = (

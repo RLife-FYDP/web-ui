@@ -12,6 +12,11 @@ const COLORS = {
 
   // YELLOWS
   Yellow: "#F7CA59",
+
+  // GRAYS
+  Graphite: "#eaeaea",
+  DarkGray: "#333333",
+  Gray: "#777777"
 }
 
 export default COLORS;
