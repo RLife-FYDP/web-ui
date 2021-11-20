@@ -1,4 +1,4 @@
-import { computed } from "mobx";
+import { action, computed } from "mobx";
 
 interface ChatProps {
   senderId: string;
@@ -6,6 +6,11 @@ interface ChatProps {
 }
 
 export class ChatViewState {
+  @action
+  sendMessage() {
+    console.log("send msg")
+  }
+
   @computed
   get testData(): ChatProps[] {
     return [
@@ -57,7 +62,9 @@ export class ChatViewState {
         senderId: "1",
         text: "THIS IS A REALLY LONG STRING AND I WAN IT TO SEE HOW IT OVERFLOWS",
       },
-    ];
+    ].reverse();
+    // need reverse because of how we are showing the data on UI
+    // so the data model can sort from oldest to newest (don't need to reverse otherwise)
   }
 
   @computed

@@ -28,9 +28,6 @@ export const MobileBottomNavBar: React.FC = () => {
       <Route exact path="/">
         <Chat />
       </Route>
-      <Route path="/chat">
-        <Chat />
-      </Route>
       <Route path="/tasks">
         <Tasks />
       </Route>
@@ -55,7 +52,7 @@ export const MobileBottomNavBar: React.FC = () => {
           {NavigationRouter}
         </StickyContainer>
         <NavigationContainer>
-          <StyledLink to="/chat">
+          <StyledLink exact to="/">
             <NavItem>
               <ChatIcon />
               Chat
