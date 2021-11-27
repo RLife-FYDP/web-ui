@@ -127,7 +127,6 @@ const ContactNameContainer = styled.h2`
 const ConversationContainer = styled.div`
   display: flex;
   flex-direction: column-reverse;
-  justify-content: flex-start;
   align-items: center;
   overflow-y: scroll;
 
