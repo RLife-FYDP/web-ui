@@ -37,7 +37,10 @@ export class Chat extends React.Component {
     return (
       <Container>
         <ContactNameContainer>
-          <GoBackContainer onClick={this.viewState.showChatOverview}>{"<"}</GoBackContainer>Marcus Yung
+          <GoBackContainer onClick={this.viewState.showChatOverview}>
+            {"<"}
+          </GoBackContainer>
+          Marcus Yung
         </ContactNameContainer>
         <ConversationContainer>
           {this.viewState.testSingleData.map((data) => (
@@ -133,7 +136,7 @@ const ConversationContainer = styled.div`
   /* TODO: take in consideration of when the notification section is closed:
   e.g. height should be: calc(100% - x - x)
   */
-  max-height: 245px;
+  max-height: 285px;
 `;
 
 const MessageSenderContainer = styled.div`

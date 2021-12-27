@@ -8,8 +8,12 @@ import { TaskViewState } from "./TaskViewState";
 
 @observer
 export class Tasks extends React.Component {
-  @observable
-  private viewState = new TaskViewState();
+  @observable private viewState = new TaskViewState();
+  @observable private isAddTaskViewEnabled = false;
+
+  showAddTaskView = () => {
+    this.isAddTaskViewEnabled = !this.isAddTaskViewEnabled;
+  };
 
   render() {
     return (
@@ -30,7 +34,7 @@ export class Tasks extends React.Component {
             </SectionContainer>
           );
         })}
-        <StyledAddTaskButton onClick={() => console.log("wow")} />
+        <StyledAddTaskButton/>
       </Container>
     );
   }
@@ -45,6 +49,7 @@ const Container = styled.div`
   height: 350px;
   overflow-y: scroll;
 `;
+
 const SectionContainer = styled.div`
   display: flex;
   flex-direction: column;

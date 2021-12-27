@@ -1,24 +1,24 @@
 import React from "react";
+import { Link, useRouteMatch } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
+import { AddTask } from "./AddTask";
 
 interface AddTaskButtonProps {
   className?: string;
-  onClick: () => void;
 }
 
-export const AddTaskButton: React.FC<AddTaskButtonProps> = ({
-  className,
-  onClick,
-}) => {
+export const AddTaskButton: React.FC<AddTaskButtonProps> = ({ className }) => {
+  let { url } = useRouteMatch();
+
   return (
-    <Container className={className}>
+    <Container className={className} to={`${url}/add`}>
       <PlusContainer>+</PlusContainer>
     </Container>
   );
 };
 
-const Container = styled.div`
+const Container = styled(Link)`
   cursor: default;
   position: relative;
   display: flex;
@@ -29,6 +29,7 @@ const Container = styled.div`
   height: 50px;
   border-radius: 20%;
   background: ${COLORS.NavyBlue};
+  text-decoration: none;
 `;
 
 const PlusContainer = styled.div`

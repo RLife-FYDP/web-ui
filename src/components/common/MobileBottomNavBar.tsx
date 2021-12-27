@@ -21,6 +21,7 @@ import { ReactComponent as TaskIcon } from "../../icons/TaskMainIcon.svg";
 import { ReactComponent as WhiteboardIcon } from "../../icons/WhiteboardMainIcon.svg";
 import { ReactComponent as ExpenseIcon } from "../../icons/ExpenseMainIcon.svg";
 import { Chat } from "../chat/Chat";
+import { AddTask } from "../tasks/AddTask";
 
 export const MobileBottomNavBar: React.FC = () => {
   const NavigationRouter = (
@@ -28,8 +29,11 @@ export const MobileBottomNavBar: React.FC = () => {
       <Route exact path="/">
         <Chat />
       </Route>
-      <Route path="/tasks">
+      <Route exact path="/tasks">
         <Tasks />
+      </Route>
+      <Route exact path="/tasks/add">
+        <AddTask />
       </Route>
       <Route path="/achievements">
         <Achievements />
@@ -112,7 +116,7 @@ const NavigationContainer = styled.div`
   width: calc(100% - 16px);
   bottom: 0;
   padding: 8px;
-  background: ${COLORS.White}
+  background: ${COLORS.White};
 `;
 
 const NavItem = styled.div`
