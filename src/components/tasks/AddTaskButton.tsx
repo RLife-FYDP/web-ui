@@ -2,7 +2,6 @@ import React from "react";
 import { Link, useRouteMatch } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
-import { AddTask } from "./AddTask";
 
 interface AddTaskButtonProps {
   className?: string;
