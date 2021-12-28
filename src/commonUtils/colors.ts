@@ -16,7 +16,10 @@ const COLORS = {
   // GRAYS
   Graphite: "#eaeaea",
   DarkGray: "#333333",
-  Gray: "#777777"
+  Gray: "#777777",
+
+  // ORANGE
+  Orange: "#FF652F"
 }
 
 export default COLORS;

@@ -41,6 +41,9 @@ export const MobileBottomNavBar: React.FC = () => {
       <Route path="/expenses">
         <Expenses />
       </Route>
+      <Route exact path="/expenses/add">
+        <Expenses />
+      </Route>
       <Route path="/canvas">
         <Canvas />
       </Route>
