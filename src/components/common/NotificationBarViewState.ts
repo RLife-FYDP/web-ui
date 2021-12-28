@@ -1,4 +1,4 @@
-import { computed } from "mobx";
+import { action, computed, makeAutoObservable, observable } from "mobx";
 
 export enum TaskType {
   CHAT,
@@ -20,6 +20,17 @@ export interface NotificationBarProps {
 }
 
 export class NotificationBarViewState {
+  @observable isNotificationsVisible = true;
+
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  @action
+  closeNotifications = () => {
+    this.isNotificationsVisible = false;
+  }
+
   @computed
   get testData(): NotificationProps[] {
     return [

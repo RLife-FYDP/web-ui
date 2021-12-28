@@ -22,9 +22,10 @@ export class Tasks extends React.Component {
           return (
             <SectionContainer>
               <SectionTitle>{data.taskSection.toDateString()}</SectionTitle>
-              {data.taskDetails.map((details) => {
+              {data.taskDetails.map((details, index) => {
                 return (
                   <SingleTask
+                    key={index}
                     title={details.title}
                     onRepeat={details.onRepeat}
                     assignee={details.assignee}

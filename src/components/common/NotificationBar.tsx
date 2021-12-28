@@ -12,7 +12,6 @@ import { NotificationBubble } from "../notifications/NotificationBubble";
 
 interface NotificationBarProps {
   onClickTaskType?: (taskType: TaskType) => void;
-  onClickClose?: () => void;
 }
 
 @observer
@@ -21,9 +20,12 @@ export class NotificationBar extends React.Component<NotificationBarProps> {
   private notifications = new NotificationBarViewState();
 
   render() {
+    if (!this.notifications.isNotificationsVisible) {
+      return null;
+    }
     return (
       <Container>
-        <CloseContainer onClick={this.props.onClickClose}>x</CloseContainer>
+        <CloseContainer onClick={this.notifications.closeNotifications}>x</CloseContainer>
         <Header>
           Welcome back to {this.notifications.roomName},{" "}
           {this.notifications.testName}
@@ -31,13 +33,14 @@ export class NotificationBar extends React.Component<NotificationBarProps> {
         </Header>
         <Caption>Here's what you've missed!</Caption>
         <NotificationsContainer>
-          {this.notifications.testData.map((data) => {
+          {this.notifications.testData.map((data, index) => {
             switch (data.taskType) {
               // case TaskType.ACHIEVEMENT:
               //   return "hello";
               default:
                 return (
                   <NotificationBubble
+                    key={index}
                     backgroundColor={COLORS.SkyBlue}
                     numNotifications={4}
                     notificationType="Expenses"
@@ -89,4 +92,4 @@ const CloseContainer = styled.div`
   position: absolute;
   right: 8px;
   top: 8px;
-`
+`;
