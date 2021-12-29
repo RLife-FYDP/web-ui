@@ -1,7 +1,7 @@
 import { observable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { ExpensesViewState } from "./ExpensesViewState";
@@ -75,7 +75,7 @@ const Caption = styled.caption`
   color: ${COLORS.Yellow};
 `;
 
-const AddExpenseButton = styled(NavLink)`
+const AddExpenseButton = styled(Link)`
   display: flex;
   justify-content: center;
   align-items: center;

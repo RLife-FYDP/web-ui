@@ -22,6 +22,7 @@ import { ReactComponent as WhiteboardIcon } from "../../icons/WhiteboardMainIcon
 import { ReactComponent as ExpenseIcon } from "../../icons/ExpenseMainIcon.svg";
 import { Chat } from "../chat/Chat";
 import { AddTask } from "../tasks/AddTask";
+import { AddExpense } from "../expenses/AddExpense";
 
 export const MobileBottomNavBar: React.FC = () => {
   const NavigationRouter = (
@@ -38,11 +39,11 @@ export const MobileBottomNavBar: React.FC = () => {
       <Route path="/achievements">
         <Achievements />
       </Route>
-      <Route path="/expenses">
+      <Route exact path="/expenses">
         <Expenses />
       </Route>
       <Route exact path="/expenses/add">
-        <Expenses />
+        <AddExpense />
       </Route>
       <Route path="/canvas">
         <Canvas />
