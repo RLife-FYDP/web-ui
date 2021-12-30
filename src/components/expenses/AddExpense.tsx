@@ -16,19 +16,52 @@ export class AddExpense extends Component {
     });
   };
 
-  @computed
-  get amount(): string {
-    let strippedAmount = this.viewState.newExpense.amount.toString().split("$");
+  updateSplitAmountById = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const id = event.target.name;
+    const value = event.target.value;
+    this.viewState.setNewSplitAmountById(id, value);
+  };
+
+  processMoneyValue(amount: string): string {
+    let strippedAmount = amount.split("$");
     let filteredAmount = strippedAmount[strippedAmount.length - 1];
 
-    if (filteredAmount === "0") {
+    if (
+      filteredAmount === "" ||
+      filteredAmount === "0" ||
+      filteredAmount === "$" ||
+      isNaN(Number(filteredAmount))
+    ) {
       return "";
     }
 
     return "$" + filteredAmount;
   }
 
+  rawMoneyValue(amount: string): number {
+    let strippedAmount = amount.toString().split("$");
+    let filteredAmount = strippedAmount[strippedAmount.length - 1];
+
+    if (
+      filteredAmount === "" ||
+      filteredAmount === "0" ||
+      filteredAmount === "$" ||
+      isNaN(Number(filteredAmount))
+    ) {
+      return 0;
+    }
+
+    return Number(filteredAmount);
+  }
+
+  @computed
+  get totalExpenseAmount(): string {
+    return this.processMoneyValue(this.viewState.newExpense.amount);
+  }
+
   render() {
+    const splits = this.viewState.newExpense.splits;
+
     return (
       <Container>
         <HeaderContainer>
@@ -47,26 +80,44 @@ export class AddExpense extends Component {
               onChange={this.updateTaskInput}
             ></ExpenseNameInput>
             <AmountInput
-              placeholder="$100.00"
+              placeholder="Amount"
               name="amount"
-              value={this.amount}
+              value={this.totalExpenseAmount}
               onChange={this.updateTaskInput}
             ></AmountInput>
           </Row>
-          <SplitContainer>
-            {this.viewState.newExpense.splits.map((split, index, arr) => (
-              <UserAmountContainer
-                key={index}
-                width={split.amount / this.viewState.newExpense.amount}
-                color={split.color}
-                isFirstItem={index === 0}
-                isLastItem={index === arr.length - 1}
-              >
-                <UserAmountName>{split.id}</UserAmountName>
-                <UserAmountSplit>${split.amount}</UserAmountSplit>
-              </UserAmountContainer>
+          {splits.length === 0 ? null : (
+            <SplitContainer>
+              {splits.map((split, index, arr) => {
+                const totalAmount = this.rawMoneyValue(
+                  this.viewState.newExpense.amount
+                );
+                return (
+                  <UserAmountContainer
+                    key={index}
+                    width={split.amount / totalAmount}
+                    color={split.color}
+                    isFirstItem={index === 0}
+                    isLastItem={index === arr.length - 1}
+                  >
+                    {/* <UserAmountName>{split.id}</UserAmountName>
+                    <UserAmountSplit>${split.amount}</UserAmountSplit> */}
+                  </UserAmountContainer>
+                );
+              })}
+            </SplitContainer>
+          )}
+          <UserAmountInputContainer>
+            {this.viewState.roommates.map((roommate, index) => (
+              <UserAmountInput
+                name={roommate.id}
+                placeholder={roommate.id + "'s amount owed"}
+                backgroundColor={roommate.color}
+                value={this.viewState.newExpense.splits[index]?.amount ?? ""}
+                onChange={this.updateSplitAmountById}
+              ></UserAmountInput>
             ))}
-          </SplitContainer>
+          </UserAmountInputContainer>
         </FormContainer>
       </Container>
     );
@@ -121,6 +172,10 @@ const Input = styled.input`
   border-radius: 5px;
   background: ${COLORS.Graphite};
   vertical-align: top;
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const ExpenseNameInput = styled(Input)`
@@ -173,3 +228,14 @@ const UserAmountContainer = styled.div<{
 const UserAmountName = styled.p``;
 
 const UserAmountSplit = styled.p``;
+
+const UserAmountInputContainer = styled.div``;
+
+const UserAmountInput = styled(Input)<{
+  backgroundColor: string;
+}>`
+  width: calc(100% - 16px);
+  // 4B = 75% opacity
+  background: ${({ backgroundColor }) => backgroundColor + "4B"};
+  border-radius: 5px;
+`;
