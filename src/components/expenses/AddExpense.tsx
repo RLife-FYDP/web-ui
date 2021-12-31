@@ -19,45 +19,8 @@ export class AddExpense extends Component {
   updateSplitAmountById = (event: React.ChangeEvent<HTMLInputElement>) => {
     const id = event.target.name;
     const value = event.target.value;
-    this.viewState.setNewSplitAmountById(id, value);
+    this.viewState.setNewSplitAmountById(id, Number(value));
   };
-
-  processMoneyValue(amount: string): string {
-    let strippedAmount = amount.split("$");
-    let filteredAmount = strippedAmount[strippedAmount.length - 1];
-
-    if (
-      filteredAmount === "" ||
-      filteredAmount === "0" ||
-      filteredAmount === "$" ||
-      isNaN(Number(filteredAmount))
-    ) {
-      return "";
-    }
-
-    return "$" + filteredAmount;
-  }
-
-  rawMoneyValue(amount: string): number {
-    let strippedAmount = amount.toString().split("$");
-    let filteredAmount = strippedAmount[strippedAmount.length - 1];
-
-    if (
-      filteredAmount === "" ||
-      filteredAmount === "0" ||
-      filteredAmount === "$" ||
-      isNaN(Number(filteredAmount))
-    ) {
-      return 0;
-    }
-
-    return Number(filteredAmount);
-  }
-
-  @computed
-  get totalExpenseAmount(): string {
-    return this.processMoneyValue(this.viewState.newExpense.amount);
-  }
 
   render() {
     const splits = this.viewState.newExpense.splits;
@@ -79,44 +42,48 @@ export class AddExpense extends Component {
               value={this.viewState.newExpense.expenseName ?? ""}
               onChange={this.updateTaskInput}
             ></ExpenseNameInput>
-            <AmountInput
-              placeholder="Amount"
-              name="amount"
-              value={this.totalExpenseAmount}
-              onChange={this.updateTaskInput}
-            ></AmountInput>
+            <AmountContainer widthPercent={30}>
+              <AmountInput
+                placeholder="0"
+                name="amount"
+                type="number"
+                min={0}
+                value={
+                  this.viewState.newExpense.amount === 0
+                    ? undefined
+                    : this.viewState.newExpense.amount
+                }
+                onChange={this.updateTaskInput}
+                onWheel={(event) => event.currentTarget.blur()}
+              ></AmountInput>
+            </AmountContainer>
           </Row>
-          {splits.length === 0 ? null : (
-            <SplitContainer>
-              {splits.map((split, index, arr) => {
-                const totalAmount = this.rawMoneyValue(
-                  this.viewState.newExpense.amount
-                );
-                return (
-                  <UserAmountContainer
-                    key={index}
-                    width={split.amount / totalAmount}
-                    color={split.color}
-                    isFirstItem={index === 0}
-                    isLastItem={index === arr.length - 1}
-                  >
-                    {/* <UserAmountName>{split.id}</UserAmountName>
-                    <UserAmountSplit>${split.amount}</UserAmountSplit> */}
-                  </UserAmountContainer>
-                );
-              })}
-            </SplitContainer>
-          )}
           <UserAmountInputContainer>
-            {this.viewState.roommates.map((roommate, index) => (
-              <UserAmountInput
-                name={roommate.id}
-                placeholder={roommate.id + "'s amount owed"}
-                backgroundColor={roommate.color}
-                value={this.viewState.newExpense.splits[index]?.amount ?? ""}
-                onChange={this.updateSplitAmountById}
-              ></UserAmountInput>
-            ))}
+            {splits.map((split, index) => {
+              return (
+                <SplitContainer>
+                  <UserNameText>{split.id}: </UserNameText>
+                  <AmountContainer
+                    widthPercent={100}
+                    progressPercent={
+                      split.amount / this.viewState.newExpense.amount
+                    }
+                    color={split.color}
+                  >
+                    <UserAmountInput
+                      key={index}
+                      name={split.id}
+                      min={0}
+                      type="number"
+                      backgroundColor={split.color}
+                      value={split.amount === 0 ? undefined : split.amount}
+                      onChange={this.updateSplitAmountById}
+                      onWheel={(event) => event.currentTarget.blur()}
+                    ></UserAmountInput>
+                  </AmountContainer>
+                </SplitContainer>
+              );
+            })}
           </UserAmountInputContainer>
         </FormContainer>
       </Container>
@@ -165,7 +132,7 @@ const StyledLink = styled(NavLink)`
 
 const Input = styled.input`
   height: 30px;
-  margin: 2px 0;
+  margin-bottom: 4px;
   padding: 4px 8px;
   font-size: 18px;
   border: none;
@@ -179,62 +146,69 @@ const Input = styled.input`
 `;
 
 const ExpenseNameInput = styled(Input)`
-  width: 75%;
+  width: 70%;
   margin-right: 4px;
 `;
 
-const AmountInput = styled(Input)`
-  width: 25%;
+const AmountContainer = styled.div<{
+  widthPercent: number;
+  progressPercent?: number;
+  color?: string;
+}>`
+  position: relative;
+  width: ${({ widthPercent }) => widthPercent + "%"};
+
+  &::before {
+    content: "$";
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    left: 0;
+    height: calc(100% - 4px);
+    margin-left: 4px;
+    z-index: 100;
+    color: ${COLORS.DarkGray};
+  }
+
+  &::after {
+    content: "";
+    z-index: -1;
+    display: ${({ progressPercent }) =>
+      progressPercent == null ? "none" : "block"};
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: calc(100% - 4px);
+    width: ${({ progressPercent }) =>
+      progressPercent == null
+        ? "0"
+        : Math.min(100, progressPercent * 100) + "%"};
+    background: ${({ color }) => (color == null ? "transparent" : color)};
+    border-radius: 5px;
+  }
 `;
+
+const AmountInput = styled(Input)`
+  width: calc(100% - 24px);
+  padding-left: 16px;
+`;
+
+const UserAmountInputContainer = styled.div``;
 
 const SplitContainer = styled.div`
   display: flex;
-  align-items: center;
-  height: 40px;
-  margin: 2px 0;
-  border: none;
-  border-radius: 5px;
-  background: ${COLORS.Graphite};
-  color: ${COLORS.White};
-`;
-
-const UserAmountContainer = styled.div<{
-  color: string;
-  width: number;
-  isFirstItem: boolean;
-  isLastItem: boolean;
-}>`
-  flex: 1;
-  display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  font-size: smaller;
-  // TODO: fix truncating text
-  flex-basis: ${({ width }) => `${width * 100}%`};
-  min-width: 0;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  background: ${({ color }) => color};
-  border-top-left-radius: ${({ isFirstItem }) => (isFirstItem ? "5px" : "0")};
-  border-bottom-left-radius: ${({ isFirstItem }) =>
-    isFirstItem ? "5px" : "0"};
-  border-top-right-radius: ${({ isLastItem }) => (isLastItem ? "5px" : "0")};
-  border-bottom-right-radius: ${({ isLastItem }) => (isLastItem ? "5px" : "0")};
+  justify-content: flex-start;
 `;
 
-const UserAmountName = styled.p``;
-
-const UserAmountSplit = styled.p``;
-
-const UserAmountInputContainer = styled.div``;
+const UserNameText = styled.p``;
 
 const UserAmountInput = styled(Input)<{
   backgroundColor: string;
 }>`
-  width: calc(100% - 16px);
+  width: calc(100% - 24px);
+  padding-left: 16px;
   // 4B = 75% opacity
   background: ${({ backgroundColor }) => backgroundColor + "4B"};
   border-radius: 5px;

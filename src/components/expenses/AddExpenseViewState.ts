@@ -16,7 +16,7 @@ interface SplitByAmount {
 
 interface NewExpenseProps {
   expenseName: string;
-  amount: string;
+  amount: number;
   splits: SplitByAmount[];
   // TODO: attach image?
   receipt?: string;
@@ -30,7 +30,7 @@ interface RoommateProps {
 export class AddExpenseViewState {
   @observable newExpense: NewExpenseProps = {
     expenseName: "",
-    amount: "0",
+    amount: 0,
     splits: [],
   };
 
@@ -39,24 +39,32 @@ export class AddExpenseViewState {
   constructor() {
     makeAutoObservable(this);
 
+    this.newExpense.splits = this.roommates.map((roommate) => ({
+      id: roommate.id,
+      amount: 0,
+      color: roommate.color,
+    }));
+
     reaction(
       () => this.newExpense.amount,
-      (newAmount, prevAmount) => {
-        const prevValue = Number(prevAmount.replaceAll("$", ""));
-        const newValue = Number(newAmount.replaceAll("$", ""));
-
-        if (isNaN(newValue) || isNaN(prevValue) || prevValue === newValue) {
+      (newValue, prevValue) => {
+        if (isNaN(newValue) || prevValue === newValue) {
           return;
         }
 
-        const isPreviouslySplitEqual = this.newExpense.splits.every(
-          (split, _, arr) => split.amount === prevValue / arr.length
-        );
+        const isPreviouslySplitEqual =
+          this.newExpense.splits.every(
+            (split, _, arr) =>
+              split.amount === Math.round((prevValue / arr.length) * 100) / 100
+          ) ||
+          this.newExpense.splits.every(
+            (split, _, arr) => split.amount === arr[0].amount
+          );
 
         if (isPreviouslySplitEqual) {
           this.newExpense.splits = this.roommates.map((roommate, _, arr) => ({
             id: roommate.id,
-            amount: newValue / arr.length,
+            amount: Math.round((newValue / arr.length) * 100) / 100,
             color: roommate.color,
           }));
         } else {
@@ -64,6 +72,15 @@ export class AddExpenseViewState {
         }
       }
     );
+
+    this.newExpense.splits.forEach((split) => {
+      reaction(
+        () => split.amount,
+        (newAmount, oldAmount) => {
+          this.newExpense.amount += newAmount - oldAmount;
+        }
+      );
+    });
   }
 
   @computed
@@ -82,28 +99,15 @@ export class AddExpenseViewState {
   };
 
   @action
-  setNewSplitAmountById = (id: string, amount: string) => {
+  setNewSplitAmountById = (id: string, amount: number) => {
     const splits = this.newExpense.splits;
     const matchingSplit = splits.find((split) => split.id === id);
-    const filteredAmount = Number(amount.replaceAll("$", ""));
 
-    if (isNaN(Number(filteredAmount))) {
-      return "";
-    }
-
-    if (matchingSplit === undefined) {
-      const colorById =
-        this.roommates.find((roommate) => roommate.id === id)?.color ?? "";
-
-      splits.push({
-        id,
-        amount: Number(filteredAmount),
-        color: colorById,
-      });
+    if (isNaN(amount)) {
       return;
     }
 
-    matchingSplit!.amount = Number(filteredAmount);
+    matchingSplit!.amount = Math.round(amount * 100) / 100;
   };
 
   submitNewExpense = () => {
