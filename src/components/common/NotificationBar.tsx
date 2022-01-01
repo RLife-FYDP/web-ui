@@ -7,56 +7,49 @@ import COLORS from "../../commonUtils/colors";
 import WaveHandIcon from "../../icons/WaveHandIcon.svg";
 import ChatBubbleIcon from "../../icons/ChatBubbleIcon.svg";
 
-import { NotificationBarViewState, TaskType } from "./NotificationBarViewState";
+import { NotificationBarViewState } from "./NotificationBarViewState";
 import { NotificationBubble } from "../notifications/NotificationBubble";
 
 interface NotificationBarProps {
-  onClickTaskType?: (taskType: TaskType) => void;
+  viewState: NotificationBarViewState;
 }
 
-@observer
-export class NotificationBar extends React.Component<NotificationBarProps> {
-  @observable
-  private notifications = new NotificationBarViewState();
-
-  render() {
-    if (!this.notifications.isNotificationsVisible) {
-      return null;
-    }
-    return (
-      <Container>
-        <CloseContainer onClick={this.notifications.closeNotifications}>x</CloseContainer>
-        <Header>
-          Welcome back to {this.notifications.roomName},{" "}
-          {this.notifications.testName}
-          <Icon src={WaveHandIcon} />
-        </Header>
-        <Caption>Here's what you've missed!</Caption>
-        <NotificationsContainer>
-          {this.notifications.testData.map((data, index) => {
-            switch (data.taskType) {
-              // case TaskType.ACHIEVEMENT:
-              //   return "hello";
-              default:
-                return (
-                  <NotificationBubble
-                    key={index}
-                    backgroundColor={COLORS.SkyBlue}
-                    numNotifications={4}
-                    notificationType="Expenses"
-                    icon={ChatBubbleIcon}
-                  />
-                );
-            }
-          })}
-        </NotificationsContainer>
-      </Container>
-    );
-  }
-}
+export const NotificationBar: React.FC<NotificationBarProps> = ({
+  viewState,
+}) => {
+  return (
+    <Container>
+      <CloseContainer onClick={viewState.closeNotifications}>x</CloseContainer>
+      <Header>
+        Welcome back to {viewState.roomName}, {viewState.testName}
+        <Icon src={WaveHandIcon} />
+      </Header>
+      <Caption>Here's what you've missed!</Caption>
+      <NotificationsContainer>
+        {viewState.testData.map((data, index) => {
+          switch (data.taskType) {
+            // case TaskType.ACHIEVEMENT:
+            //   return "hello";
+            default:
+              return (
+                <NotificationBubble
+                  key={index}
+                  backgroundColor={COLORS.SkyBlue}
+                  numNotifications={4}
+                  notificationType="Expenses"
+                  icon={ChatBubbleIcon}
+                />
+              );
+          }
+        })}
+      </NotificationsContainer>
+    </Container>
+  );
+};
 
 const Container = styled.div`
   position: relative;
+  height: 130px;
   width: calc(100% - 16px);
   margin: 8px;
   padding: 16px;

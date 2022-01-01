@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { SingleExpenseProps } from "./ExpensesViewState";
+import { ReactComponent as GroceryIcon } from "../../icons/GroceryIcon.svg";
 
 export const SingleExpense: React.FC<SingleExpenseProps> = ({
   date,
@@ -13,44 +14,51 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
   const month = date.toLocaleString("default", { month: "short" });
   const day = date.getDate();
   return (
-    <Container>
-      <CreatedDataContainer>
-        <CreatedDate>
-          <Month>{month}</Month>
-          <Day>{day}</Day>
-        </CreatedDate>
-      </CreatedDataContainer>
-      <Category>
-        {"<ICON>"}
-        {category}
-      </Category>
-      <Payee>
-        <PaidBy>Paid By</PaidBy>
-        <PaidByName>{paidBy}</PaidByName>
-      </Payee>
-      <StateContainer>
-        <State>
-          <StateHeader>{state}</StateHeader>
-          <Amount>{amount}</Amount>
-        </State>
-      </StateContainer>
-    </Container>
+    <TableRow>
+      <TableCell>
+        <CreatedDateContainer>
+          <CreatedDate>
+            <Month>{month}</Month>
+            <Day>{day}</Day>
+          </CreatedDate>
+        </CreatedDateContainer>
+      </TableCell>
+      <TableCell>
+        <Category>
+          <GroceryIcon />
+          {category}
+        </Category>
+      </TableCell>
+      <TableCell>
+        <Payee>
+          <PaidBy>Paid By</PaidBy>
+          <PaidByName>{paidBy}</PaidByName>
+        </Payee>
+      </TableCell>
+      <TableCell>
+        <StateContainer>
+          <State>
+            <StateHeader>{state}</StateHeader>
+            <Amount>{amount}</Amount>
+          </State>
+        </StateContainer>
+      </TableCell>
+    </TableRow>
   );
 };
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  align-items: center;
-  margin: 8px 0;
+const TableRow = styled.tr`
+  border-spacing: 0;
 `;
 
-const CreatedDataContainer = styled.div`
+const TableCell = styled.td`
+  padding-bottom: 16px;
+`;
+
+const CreatedDateContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  flex-basis: 25%;
 `;
 
 const CreatedDate = styled.div`
@@ -72,14 +80,12 @@ const Category = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  flex-basis: 25%;
 `;
 
 const Payee = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex-basis: 25%;
 `;
 
 const PaidBy = styled.p`
@@ -91,8 +97,8 @@ const PaidByName = styled.p`
   font-size: 20px;
 `;
 
-const StateContainer = styled(CreatedDataContainer)`
-  align-items: flex-end;
+const StateContainer = styled(CreatedDateContainer)`
+  align-items: center;
 `;
 
 const State = styled.div`

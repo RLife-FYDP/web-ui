@@ -57,10 +57,7 @@ const TitleContainer = styled.div`
   align-items: flex-start;
 `;
 
-const ExpenseContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 285px;
+const ExpenseContainer = styled.table`
   margin: 16px 0;
 `;
 
@@ -79,7 +76,8 @@ const AddExpenseButton = styled(Link)`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 16px;
+  height: 40px;
+  padding: 4px 16px;
   color: ${COLORS.White};
   font-size: 14px;
   border-radius: 12px;

@@ -72,15 +72,6 @@ export class AddExpenseViewState {
         }
       }
     );
-
-    this.newExpense.splits.forEach((split) => {
-      reaction(
-        () => split.amount,
-        (newAmount, oldAmount) => {
-          this.newExpense.amount += newAmount - oldAmount;
-        }
-      );
-    });
   }
 
   @computed

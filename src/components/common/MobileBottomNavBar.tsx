@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import {
   BrowserRouter as Router,
   Switch,
@@ -23,78 +23,87 @@ import { ReactComponent as ExpenseIcon } from "../../icons/ExpenseMainIcon.svg";
 import { Chat } from "../chat/Chat";
 import { AddTask } from "../tasks/AddTask";
 import { AddExpense } from "../expenses/AddExpense";
+import { observer } from "mobx-react";
+import { NotificationBarViewState } from "./NotificationBarViewState";
+import { observable } from "mobx";
 
-export const MobileBottomNavBar: React.FC = () => {
-  const NavigationRouter = (
-    <Switch>
-      <Route exact path="/">
-        <Chat />
-      </Route>
-      <Route exact path="/tasks">
-        <Tasks />
-      </Route>
-      <Route exact path="/tasks/add">
-        <AddTask />
-      </Route>
-      <Route path="/achievements">
-        <Achievements />
-      </Route>
-      <Route exact path="/expenses">
-        <Expenses />
-      </Route>
-      <Route exact path="/expenses/add">
-        <AddExpense />
-      </Route>
-      <Route path="/canvas">
-        <Canvas />
-      </Route>
-    </Switch>
-  );
+@observer
+export class MobileBottomNavBar extends Component {
+  @observable private notificationsViewState = new NotificationBarViewState();
 
-  return (
-    <Router>
-      <Container>
-        <StickyContainer>
-          <MobileTopNavBar />
-          <NotificationBar />
-          {NavigationRouter}
-        </StickyContainer>
-        <NavigationContainer>
-          <StyledLink exact to="/">
-            <NavItem>
-              <ChatIcon />
-              Chat
-            </NavItem>
-          </StyledLink>
-          <StyledLink to="/tasks">
-            <NavItem>
-              <TaskIcon />
-              Tasks
-            </NavItem>
-          </StyledLink>
-          <StyledLink to="/achievements">
-            <NavItem>
-              <AchievementIcon />
-              Achievements
-            </NavItem>
-          </StyledLink>
-          <StyledLink to="/expenses">
-            <NavItem>
-              <ExpenseIcon />
-              Expenses
-            </NavItem>
-          </StyledLink>
-          <StyledLink to="/canvas">
-            <NavItem>
-              <WhiteboardIcon />
-              Canvas
-            </NavItem>
-          </StyledLink>
-        </NavigationContainer>
-      </Container>
-    </Router>
-  );
-};
+  render() {
+    const NavigationRouter = (
+      <Switch>
+        <Route exact path="/">
+          <Chat />
+        </Route>
+        <Route exact path="/tasks">
+          <Tasks />
+        </Route>
+        <Route exact path="/tasks/add">
+          <AddTask />
+        </Route>
+        <Route path="/achievements">
+          <Achievements />
+        </Route>
+        <Route exact path="/expenses">
+          <Expenses />
+        </Route>
+        <Route exact path="/expenses/add">
+          <AddExpense />
+        </Route>
+        <Route path="/canvas">
+          <Canvas />
+        </Route>
+      </Switch>
+    );
+    return (
+      <Router>
+        <Container>
+          <StickyContainer>
+            <MobileTopNavBar />
+            {this.notificationsViewState.isNotificationsVisible ? (
+              <NotificationBar viewState={this.notificationsViewState} />
+            ) : null}
+            {NavigationRouter}
+          </StickyContainer>
+          <NavigationContainer>
+            <StyledLink exact to="/">
+              <NavItem>
+                <ChatIcon />
+                Chat
+              </NavItem>
+            </StyledLink>
+            <StyledLink to="/tasks">
+              <NavItem>
+                <TaskIcon />
+                Tasks
+              </NavItem>
+            </StyledLink>
+            <StyledLink to="/achievements">
+              <NavItem>
+                <AchievementIcon />
+                Achievements
+              </NavItem>
+            </StyledLink>
+            <StyledLink to="/expenses">
+              <NavItem>
+                <ExpenseIcon />
+                Expenses
+              </NavItem>
+            </StyledLink>
+            <StyledLink to="/canvas">
+              <NavItem>
+                <WhiteboardIcon />
+                Canvas
+              </NavItem>
+            </StyledLink>
+          </NavigationContainer>
+        </Container>
+      </Router>
+    );
+  }
+}
 
 const Container = styled.div`
   position: fixed;

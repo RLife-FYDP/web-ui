@@ -29,7 +29,7 @@ export class NotificationBarViewState {
   @action
   closeNotifications = () => {
     this.isNotificationsVisible = false;
-  }
+  };
 
   @computed
   get testData(): NotificationProps[] {
