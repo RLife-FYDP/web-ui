@@ -28,7 +28,9 @@ export class AddTask extends Component {
         <HeaderContainer>
           <StyledLink to="/tasks">Cancel</StyledLink>
           <Header>New Task</Header>
-          <StyledLink to="/tasks" onClick={this.viewState.submitNewTask}>Add</StyledLink>
+          <StyledLink to="/tasks" onClick={this.viewState.submitNewTask}>
+            Add
+          </StyledLink>
         </HeaderContainer>
         <FormContainer>
           <Input
@@ -71,11 +73,8 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: calc(100% - 16px);
+  max-height: 100%;
   margin: 8px;
-  /* TODO: take in consideration of when the notification section is closed:
-  e.g. height should be: calc(100% - x - x)
-  */
-  max-height: 350px;
   overflow-y: scroll;
 `;
 

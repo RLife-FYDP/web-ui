@@ -35,19 +35,18 @@ export class Tasks extends React.Component {
             </SectionContainer>
           );
         })}
-        <StyledAddTaskButton/>
+        <StyledAddTaskButton />
       </Container>
     );
   }
 }
 
-// TODO: make height dynamic by calculating differences instead
 const Container = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
+  max-height: 100%;
   margin: 8px;
-  height: 350px;
   overflow-y: scroll;
 `;
 
@@ -63,7 +62,6 @@ const SectionTitle = styled.h4`
 
 const StyledAddTaskButton = styled(AddTaskButton)`
   position: fixed;
-  // TODO: change hardcode 75 to height of the bottom nav bar
   bottom: calc(75px + 16px);
   right: 16px;
 `;

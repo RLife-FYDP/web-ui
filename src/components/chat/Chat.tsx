@@ -131,12 +131,8 @@ const ConversationContainer = styled.div`
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
+  max-height: 100%;
   overflow-y: scroll;
-
-  /* TODO: take in consideration of when the notification section is closed:
-  e.g. height should be: calc(100% - x - x)
-  */
-  max-height: 285px;
 `;
 
 const MessageSenderContainer = styled.div`

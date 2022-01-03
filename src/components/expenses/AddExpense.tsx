@@ -97,9 +97,6 @@ const Container = styled.div`
   flex-direction: column;
   width: calc(100% - 16px);
   margin: 8px;
-  /* TODO: take in consideration of when the notification section is closed:
-  e.g. height should be: calc(100% - x - x)
-  */
   max-height: 350px;
   overflow-y: scroll;
 `;

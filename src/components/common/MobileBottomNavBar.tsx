@@ -65,7 +65,13 @@ export class MobileBottomNavBar extends Component {
             {this.notificationsViewState.isNotificationsVisible ? (
               <NotificationBar viewState={this.notificationsViewState} />
             ) : null}
-            {NavigationRouter}
+            <ComponentContainer
+              isNotificationsActive={
+                this.notificationsViewState.isNotificationsVisible
+              }
+            >
+              {NavigationRouter}
+            </ComponentContainer>
           </StickyContainer>
           <NavigationContainer>
             <StyledLink exact to="/">
@@ -112,11 +118,22 @@ const Container = styled.div`
   justify-content: space-between;
   align-items: center;
   width: calc(100% - 16px);
+  height: 100%;
   margin: 8px;
 `;
 
 const StickyContainer = styled.div`
   width: 100%;
+  height: 100%;
+`;
+
+const ComponentContainer = styled.div<{
+  isNotificationsActive: boolean;
+}>`
+  height: ${({ isNotificationsActive }) =>
+    isNotificationsActive
+      ? "calc(100% - 48px - 75px - 130px - 50px)"
+      : "calc(100% - 48px - 75px - 50px)"};
 `;
 
 const NavigationContainer = styled.div`

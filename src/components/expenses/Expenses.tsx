@@ -43,6 +43,7 @@ const Container = styled.div`
   flex-direction: column;
   margin: 8px;
   margin-top: 24px;
+  max-height: 100%;
 `;
 
 const HeaderContainer = styled.div`
