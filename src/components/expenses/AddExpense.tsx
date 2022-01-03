@@ -18,7 +18,7 @@ export class AddExpense extends Component {
 
   updateSplitAmountById = (event: React.ChangeEvent<HTMLInputElement>) => {
     const id = event.target.name;
-    const value = event.target.value;
+    const value = event.target.value.replace(/^0+/, "");
     this.viewState.setNewSplitAmountById(id, Number(value));
   };
 
@@ -50,7 +50,7 @@ export class AddExpense extends Component {
                 min={0}
                 value={
                   this.viewState.newExpense.amount === 0
-                    ? undefined
+                    ? ""
                     : this.viewState.newExpense.amount
                 }
                 onChange={this.updateTaskInput}
@@ -74,9 +74,10 @@ export class AddExpense extends Component {
                       key={index}
                       name={split.id}
                       min={0}
+                      placeholder="0"
                       type="number"
                       backgroundColor={split.color}
-                      value={split.amount === 0 ? undefined : split.amount}
+                      value={split.amount === 0 ? "" : split.amount}
                       onChange={this.updateSplitAmountById}
                       onWheel={(event) => event.currentTarget.blur()}
                     ></UserAmountInput>

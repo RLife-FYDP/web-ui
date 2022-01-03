@@ -98,10 +98,20 @@ export class AddExpenseViewState {
       return;
     }
 
-    matchingSplit!.amount = Math.round(amount * 100) / 100;
+    const roundedAmount = Math.round(amount * 100) / 100;
+    matchingSplit!.amount = roundedAmount;
+
+    this.newExpense.amount = splits.reduce(
+      (acc, split) => acc + split.amount,
+      0
+    );
   };
 
   submitNewExpense = () => {
-    console.log(this.newExpense.amount);
+    if (!this.isSplitsTotalEqualToTotalAmount) {
+      alert(
+        "Sum of amounts not matching, which amount would you like to default to? (option of splits or total input)"
+      );
+    }
   };
 }
