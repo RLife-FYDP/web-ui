@@ -185,6 +185,7 @@ const AmountContainer = styled.div<{
       progressPercent == null
         ? "0"
         : Math.min(100, progressPercent * 100) + "%"};
+    transition: width 0.3s linear;
     background: ${({ color }) => (color == null ? "transparent" : color)};
     border-radius: 5px;
   }
