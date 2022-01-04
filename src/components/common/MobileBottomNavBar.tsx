@@ -26,10 +26,13 @@ import { AddExpense } from "../expenses/AddExpense";
 import { observer } from "mobx-react";
 import { NotificationBarViewState } from "./NotificationBarViewState";
 import { observable } from "mobx";
+import { Signup } from "../authentication/Signup";
 
 @observer
 export class MobileBottomNavBar extends Component {
   @observable private notificationsViewState = new NotificationBarViewState();
+  // TODO: convert path to using react router props later
+  @observable private path = window.location.pathname;
 
   render() {
     const NavigationRouter = (
@@ -55,56 +58,70 @@ export class MobileBottomNavBar extends Component {
         <Route path="/canvas">
           <Canvas />
         </Route>
+        <Route path="/signup">
+          <Signup />
+        </Route>
       </Switch>
     );
+
+    const Navigation = (
+      <NavigationContainer>
+        <StyledLink exact to="/">
+          <NavItem>
+            <ChatIcon />
+            Chat
+          </NavItem>
+        </StyledLink>
+        <StyledLink to="/tasks">
+          <NavItem>
+            <TaskIcon />
+            Tasks
+          </NavItem>
+        </StyledLink>
+        <StyledLink to="/achievements">
+          <NavItem>
+            <AchievementIcon />
+            Achievements
+          </NavItem>
+        </StyledLink>
+        <StyledLink to="/expenses">
+          <NavItem>
+            <ExpenseIcon />
+            Expenses
+          </NavItem>
+        </StyledLink>
+        <StyledLink to="/canvas">
+          <NavItem>
+            <WhiteboardIcon />
+            Canvas
+          </NavItem>
+        </StyledLink>
+      </NavigationContainer>
+    );
+
     return (
       <Router>
         <Container>
-          <StickyContainer>
-            <MobileTopNavBar />
-            {this.notificationsViewState.isNotificationsVisible ? (
-              <NotificationBar viewState={this.notificationsViewState} />
-            ) : null}
-            <ComponentContainer
-              isNotificationsActive={
-                this.notificationsViewState.isNotificationsVisible
-              }
-            >
-              {NavigationRouter}
-            </ComponentContainer>
-          </StickyContainer>
-          <NavigationContainer>
-            <StyledLink exact to="/">
-              <NavItem>
-                <ChatIcon />
-                Chat
-              </NavItem>
-            </StyledLink>
-            <StyledLink to="/tasks">
-              <NavItem>
-                <TaskIcon />
-                Tasks
-              </NavItem>
-            </StyledLink>
-            <StyledLink to="/achievements">
-              <NavItem>
-                <AchievementIcon />
-                Achievements
-              </NavItem>
-            </StyledLink>
-            <StyledLink to="/expenses">
-              <NavItem>
-                <ExpenseIcon />
-                Expenses
-              </NavItem>
-            </StyledLink>
-            <StyledLink to="/canvas">
-              <NavItem>
-                <WhiteboardIcon />
-                Canvas
-              </NavItem>
-            </StyledLink>
-          </NavigationContainer>
+          {this.path.includes("signup") ? (
+            NavigationRouter
+          ) : (
+            <>
+              <StickyContainer>
+                <MobileTopNavBar />
+                {this.notificationsViewState.isNotificationsVisible ? (
+                  <NotificationBar viewState={this.notificationsViewState} />
+                ) : null}
+                <ComponentContainer
+                  isNotificationsActive={
+                    this.notificationsViewState.isNotificationsVisible
+                  }
+                >
+                  {NavigationRouter}
+                </ComponentContainer>
+              </StickyContainer>
+              {Navigation}
+            </>
+          )}
         </Container>
       </Router>
     );
