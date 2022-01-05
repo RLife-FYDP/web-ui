@@ -9,11 +9,6 @@ import { TaskViewState } from "./TaskViewState";
 @observer
 export class Tasks extends React.Component {
   @observable private viewState = new TaskViewState();
-  @observable private isAddTaskViewEnabled = false;
-
-  showAddTaskView = () => {
-    this.isAddTaskViewEnabled = !this.isAddTaskViewEnabled;
-  };
 
   render() {
     return (
