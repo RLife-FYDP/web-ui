@@ -63,23 +63,23 @@ export class AddTask extends Component {
           <DatePicker
             onChange={(date) => this.updateDateFields("startDate", date)}
             value={newTask.startDate ?? null}
-            renderInput={(props) => (
-              <StyledMUITextField
-                {...props}
-                placeholder={
-                  newTask.endDate !== undefined ? "Start Date" : "Due Date"
-                }
-              />
+            renderInput={({ inputRef, inputProps }) => (
+              <Input
+                ref={inputRef}
+                {...inputProps}
+                placeholder="Due Date? (Start of repeated tasks)"
+              ></Input>
             )}
           />
           <DatePicker
             onChange={(date) => this.updateDateFields("endDate", date)}
             value={newTask.endDate ?? null}
-            renderInput={(props) => (
-              <StyledMUITextField
-                {...props}
-                placeholder="End Date (Optional)"
-              />
+            renderInput={({ inputRef, inputProps }) => (
+              <Input
+                ref={inputRef}
+                {...inputProps}
+                placeholder="End Date? (Input for repeated tasks)"
+              ></Input>
             )}
           />
         </FormContainer>
