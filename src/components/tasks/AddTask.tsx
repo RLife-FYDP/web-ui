@@ -5,6 +5,8 @@ import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { AddTaskViewState } from "./AddTaskViewState";
+import { DatePicker } from "@mui/lab";
+import TextField from "@mui/material/TextField";
 
 @observer
 export class AddTask extends Component {
@@ -22,7 +24,14 @@ export class AddTask extends Component {
     });
   };
 
+  updateDateFields = (type: string, date?: Date | undefined | null) => {
+    this.viewState.setNewTaskValueByKey({
+      [type]: date,
+    });
+  };
+
   render() {
+    const { newTask } = this.viewState;
     return (
       <Container>
         <HeaderContainer>
@@ -36,33 +45,43 @@ export class AddTask extends Component {
           <Input
             placeholder="What is your task?"
             name="taskName"
-            value={this.viewState.newTask.taskName ?? ""}
+            value={newTask.taskName ?? ""}
             onChange={this.updateTaskInput}
           ></Input>
           <DescriptionInput
             placeholder="Description..."
             name="description"
-            value={this.viewState.newTask.description ?? ""}
+            value={newTask.description ?? ""}
             onChange={this.updateTaskTextField}
           ></DescriptionInput>
           <Input
-            placeholder="Tags"
-            name="tags"
-            value={this.viewState.newTask.tags ?? ""}
-            onChange={this.updateTaskInput}
-          ></Input>
-          <Input
             placeholder="Assign to"
             name="assignee"
-            value={this.viewState.newTask.assignee ?? ""}
+            value={newTask.assignee ?? ""}
             onChange={this.updateTaskInput}
           ></Input>
-          <Input
-            placeholder="Schedule"
-            name="schedule"
-            value={this.viewState.newTask.schedule ?? ""}
-            onChange={this.updateTaskInput}
-          ></Input>
+          <DatePicker
+            onChange={(date) => this.updateDateFields("startDate", date)}
+            value={newTask.startDate ?? null}
+            renderInput={(props) => (
+              <StyledMUITextField
+                {...props}
+                placeholder={
+                  newTask.endDate !== undefined ? "Start Date" : "Due Date"
+                }
+              />
+            )}
+          />
+          <DatePicker
+            onChange={(date) => this.updateDateFields("endDate", date)}
+            value={newTask.endDate ?? null}
+            renderInput={(props) => (
+              <StyledMUITextField
+                {...props}
+                placeholder="End Date (Optional)"
+              />
+            )}
+          />
         </FormContainer>
       </Container>
     );
@@ -109,6 +128,10 @@ const Input = styled.input`
   border-radius: 5px;
   background: ${COLORS.Graphite};
   vertical-align: top;
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const DescriptionInput = styled.textarea`
@@ -121,4 +144,27 @@ const DescriptionInput = styled.textarea`
   border-radius: 5px;
   background: ${COLORS.Graphite};
   vertical-align: top;
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+const StyledMUITextField = styled(TextField)`
+  padding: 0;
+  background: ${COLORS.Graphite};
+  border-radius: 5px;
+  input {
+    margin: 2px 0;
+    padding: 4px 8px;
+    font-size: 18px;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  fieldset {
+    border: none;
+  }
 `;

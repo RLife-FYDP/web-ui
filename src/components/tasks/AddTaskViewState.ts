@@ -6,7 +6,8 @@ interface NewTaskProps {
   tags?: string;
   assignee?: string;
   // TODO: schedule needs to be some object that is cross compatible
-  schedule?: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export class AddTaskViewState {
@@ -21,9 +22,9 @@ export class AddTaskViewState {
   @action
   setNewTaskValueByKey = (kVPairUpdate: Partial<NewTaskProps>) => {
     this.newTask = { ...this.newTask, ...kVPairUpdate };
-  }
+  };
 
   submitNewTask = () => {
-    console.log(this.newTask.taskName);
-  }
+    console.log(this.newTask.startDate);
+  };
 }
