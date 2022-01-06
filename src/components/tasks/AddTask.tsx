@@ -1,16 +1,32 @@
 import { observable } from "mobx";
 import { observer } from "mobx-react";
-import React, { Component } from "react";
+import * as React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { AddTaskViewState } from "./AddTaskViewState";
-import { DatePicker } from "@mui/lab";
-import TextField from "@mui/material/TextField";
+import { DatePicker, ToggleButton } from "@mui/lab";
+import { styled as muiStyled } from "@mui/system";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+
+interface AddTaskProps {}
+
+interface AddTaskState {
+  isRepeatableEvent: boolean;
+}
 
 @observer
-export class AddTask extends Component {
+export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
   @observable private viewState = new AddTaskViewState();
+
+  // Not sure why @observable isn't working on isRepeatableEvent...
+  // will resort to state for now
+  constructor(props: AddTaskProps) {
+    super(props);
+    this.state = {
+      isRepeatableEvent: false,
+    };
+  }
 
   updateTaskInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.viewState.setNewTaskValueByKey({
@@ -60,6 +76,18 @@ export class AddTask extends Component {
             value={newTask.assignee ?? ""}
             onChange={this.updateTaskInput}
           ></Input>
+          <ToggleButtonGroup
+            value={this.state.isRepeatableEvent}
+            exclusive
+            onChange={(_, isRepeatableEvent) => {
+              this.setState({
+                isRepeatableEvent: isRepeatableEvent ?? false,
+              });
+            }}
+          >
+            <StyledToggleButton value={false}>One time task</StyledToggleButton>
+            <StyledToggleButton value={true}>Repeating task</StyledToggleButton>
+          </ToggleButtonGroup>
           <DatePicker
             onChange={(date) => this.updateDateFields("startDate", date)}
             value={newTask.startDate ?? null}
@@ -67,21 +95,25 @@ export class AddTask extends Component {
               <Input
                 ref={inputRef}
                 {...inputProps}
-                placeholder="Due Date? (Start of repeated tasks)"
+                placeholder={
+                  this.state.isRepeatableEvent ? "Start Date" : "Day of task"
+                }
               ></Input>
             )}
           />
-          <DatePicker
-            onChange={(date) => this.updateDateFields("endDate", date)}
-            value={newTask.endDate ?? null}
-            renderInput={({ inputRef, inputProps }) => (
-              <Input
-                ref={inputRef}
-                {...inputProps}
-                placeholder="End Date? (Input for repeated tasks)"
-              ></Input>
-            )}
-          />
+          {this.state.isRepeatableEvent ? (
+            <DatePicker
+              onChange={(date) => this.updateDateFields("endDate", date)}
+              value={newTask.endDate ?? null}
+              renderInput={({ inputRef, inputProps }) => (
+                <Input
+                  ref={inputRef}
+                  {...inputProps}
+                  placeholder="End Date"
+                ></Input>
+              )}
+            />
+          ) : null}
         </FormContainer>
       </Container>
     );
@@ -150,21 +182,8 @@ const DescriptionInput = styled.textarea`
   }
 `;
 
-const StyledMUITextField = styled(TextField)`
-  padding: 0;
-  background: ${COLORS.Graphite};
-  border-radius: 5px;
-  input {
-    margin: 2px 0;
-    padding: 4px 8px;
-    font-size: 18px;
-
-    &:focus {
-      outline: none;
-    }
-  }
-
-  fieldset {
-    border: none;
-  }
-`;
+const StyledToggleButton = muiStyled(ToggleButton)({
+  height: "30px",
+  width: "50%",
+  margin: "2px 0",
+});
