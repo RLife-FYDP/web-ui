@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import { observable } from "mobx";
 import { observer } from "mobx-react";
 import * as React from "react";
@@ -6,6 +7,7 @@ import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import {
   AddTaskViewState,
+  DefaultOptions,
   RRuleFrequencies,
   RRuleWeekdayIntervals,
 } from "./AddTaskViewState";
@@ -13,7 +15,7 @@ import { DatePicker, ToggleButton } from "@mui/lab";
 import { styled as muiStyled } from "@mui/system";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { FormControl, MenuItem, Select } from "@mui/material";
-import { Frequency, Weekday } from "rrule";
+import RRule, { Frequency, Weekday } from "rrule";
 
 interface AddTaskProps {}
 
@@ -34,17 +36,26 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
     };
   }
 
+  handleIsRepeatableEventChange = (state: boolean) => {
+    this.setState({
+      isRepeatableEvent: state ?? this.state.isRepeatableEvent,
+    });
+
+    this.updateDateFields("startDate", undefined);
+    this.viewState.newTask.rruleOptions = undefined;
+  };
+
   getRRuleFreqNameFromEnum = (value: number) => {
     return RRuleFrequencies.find((freq) => freq.value === value)?.label;
   };
 
-  updateTaskInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+  updateTaskTextField = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     this.viewState.setNewTaskValueByKey({
       [event.target.name]: event.target.value,
     });
   };
 
-  updateTaskTextField = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  updateTaskInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.viewState.setNewTaskValueByKey({
       [event.target.name]: event.target.value,
     });
@@ -72,10 +83,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
             value={this.state.isRepeatableEvent}
             exclusive
             onChange={(_, isRepeatableEvent) => {
-              this.setState({
-                isRepeatableEvent:
-                  isRepeatableEvent ?? this.state.isRepeatableEvent,
-              });
+              this.handleIsRepeatableEventChange(isRepeatableEvent);
             }}
           >
             <StyledToggleButton value={false}>One time task</StyledToggleButton>
@@ -100,7 +108,12 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
             onChange={this.updateTaskInput}
           ></Input>
           <DatePicker
-            onChange={(date) => this.updateDateFields("startDate", date)}
+            onChange={(date) =>
+              this.updateDateFields(
+                "startDate",
+                date == undefined ? null : new Date(date)
+              )
+            }
             value={newTask.startDate ?? null}
             renderInput={({ inputRef, inputProps }) => (
               <Input
@@ -208,6 +221,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
                   </StyledSelect>
                 </FormControl>
               ) : null}
+              <RRuleDateText>{this.viewState.rruleText}</RRuleDateText>
             </>
           ) : null}
         </FormContainer>
@@ -310,4 +324,14 @@ const StyledSelectValueHolder = styled.p`
 
 const StyledSelectValuePlaceholder = styled.p`
   color: ${COLORS.Gray};
+`;
+
+const RRuleDateText = styled.em`
+  margin-top: 4px;
+  color: ${COLORS.Gray};
+  font-size: 12px;
+
+  &:first-letter {
+    text-transform: capitalize;
+  }
 `;
