@@ -4,10 +4,12 @@ import * as React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
-import { AddTaskViewState } from "./AddTaskViewState";
+import { AddTaskViewState, RRuleWeekdayIntervals } from "./AddTaskViewState";
 import { DatePicker, ToggleButton } from "@mui/lab";
 import { styled as muiStyled } from "@mui/system";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Weekday } from "rrule";
 
 interface AddTaskProps {}
 
@@ -24,7 +26,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
   constructor(props: AddTaskProps) {
     super(props);
     this.state = {
-      isRepeatableEvent: false,
+      isRepeatableEvent: true,
     };
   }
 
@@ -58,6 +60,18 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
           </StyledLink>
         </HeaderContainer>
         <FormContainer>
+          <ToggleButtonGroup
+            value={this.state.isRepeatableEvent}
+            exclusive
+            onChange={(_, isRepeatableEvent) => {
+              this.setState({
+                isRepeatableEvent: isRepeatableEvent ?? false,
+              });
+            }}
+          >
+            <StyledToggleButton value={false}>One time task</StyledToggleButton>
+            <StyledToggleButton value={true}>Repeating task</StyledToggleButton>
+          </ToggleButtonGroup>
           <Input
             placeholder="What is your task?"
             name="taskName"
@@ -76,18 +90,6 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
             value={newTask.assignee ?? ""}
             onChange={this.updateTaskInput}
           ></Input>
-          <ToggleButtonGroup
-            value={this.state.isRepeatableEvent}
-            exclusive
-            onChange={(_, isRepeatableEvent) => {
-              this.setState({
-                isRepeatableEvent: isRepeatableEvent ?? false,
-              });
-            }}
-          >
-            <StyledToggleButton value={false}>One time task</StyledToggleButton>
-            <StyledToggleButton value={true}>Repeating task</StyledToggleButton>
-          </ToggleButtonGroup>
           <DatePicker
             onChange={(date) => this.updateDateFields("startDate", date)}
             value={newTask.startDate ?? null}
@@ -96,23 +98,66 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
                 ref={inputRef}
                 {...inputProps}
                 placeholder={
-                  this.state.isRepeatableEvent ? "Start Date" : "Day of task"
+                  this.state.isRepeatableEvent ? "Start Date" : "Due Date"
                 }
               ></Input>
             )}
           />
           {this.state.isRepeatableEvent ? (
-            <DatePicker
-              onChange={(date) => this.updateDateFields("endDate", date)}
-              value={newTask.endDate ?? null}
-              renderInput={({ inputRef, inputProps }) => (
-                <Input
-                  ref={inputRef}
-                  {...inputProps}
-                  placeholder="End Date"
-                ></Input>
-              )}
-            />
+            <>
+              <DatePicker
+                onChange={(date) => this.updateDateFields("endDate", date)}
+                value={newTask.endDate ?? null}
+                renderInput={({ inputRef, inputProps }) => (
+                  <Input
+                    ref={inputRef}
+                    {...inputProps}
+                    placeholder="End Date"
+                  ></Input>
+                )}
+              />
+              <FormControl fullWidth>
+                <StyledSelect
+                  displayEmpty
+                  multiple
+                  value={newTask.rruleOptions?.byweekday ?? []}
+                  onChange={(event) => {
+                    const inputValue = event.target.value as string | string[];
+                    const values: string[] =
+                      typeof inputValue === "string"
+                        ? inputValue.split(",")
+                        : inputValue;
+
+                    const valuesAsInt = values
+                      .map((val) => parseInt(val))
+                      .filter((val) => !isNaN(val));
+                    this.viewState.setNewRRuleValueByKey({
+                      byweekday: valuesAsInt.length === 0 ? null : valuesAsInt,
+                    });
+                  }}
+                  renderValue={(values) => {
+                    if (Array.isArray(values) && values.length === 0) {
+                      return <p>Days to repeat</p>;
+                    }
+
+                    return (
+                      <p>
+                        {(values as number[])
+                          .sort()
+                          .map((day) => new Weekday(day).toString())
+                          .join(", ")}
+                      </p>
+                    );
+                  }}
+                >
+                  {RRuleWeekdayIntervals.map((option) => (
+                    <MenuItem value={option.weekday}>
+                      {option.toString()}
+                    </MenuItem>
+                  ))}
+                </StyledSelect>
+              </FormControl>
+            </>
           ) : null}
         </FormContainer>
       </Container>
@@ -124,7 +169,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: calc(100% - 16px);
-  max-height: 100%;
+  height: 100%;
   margin: 8px;
   overflow-y: scroll;
 `;
@@ -187,3 +232,9 @@ const StyledToggleButton = muiStyled(ToggleButton)({
   width: "50%",
   margin: "2px 0",
 });
+
+const StyledSelect = muiStyled(Select)(() => ({
+  height: "38px",
+  margin: "2px 0",
+  background: COLORS.Graphite,
+}));
