@@ -27,7 +27,10 @@ export const RRuleWeekdayIntervals = [
   RRule.SU,
 ];
 
-export const RRuleFrequencies = [Frequency.WEEKLY, Frequency.DAILY];
+export const RRuleFrequencies = [
+  { label: "Daily", value: Frequency.DAILY },
+  { label: "Weekly", value: Frequency.WEEKLY },
+];
 
 // TODO: Expand support if time permits: we will only support weekly intervals up to a month
 // (e.g. min weekly = every week, max weekly = every month)
