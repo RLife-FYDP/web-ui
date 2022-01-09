@@ -8,7 +8,7 @@ yarn start
 
 Ongoing discussion on APIs needed: [Link](https://docs.google.com/spreadsheets/d/1mtEtLnnVQl1BV7zaE0db-a468OKGiWccbkiW0Aadz0I/edit#gid=0)
 
-## RRule Depedency
+## RRule Dependency
 
 [RRule](https://github.com/jakubroztocil/rrule) dependency is used for our scheduling logic. Read more here.
 
