@@ -1,16 +1,19 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
-import RLifeIcon from '../../icons/RLifeIcon.svg';
-import ProfileIcon from '../../icons/ProfileIcon.svg';
+import RLifeIcon from "../../icons/RLifeIcon.svg";
+import ProfileIcon from "../../icons/ProfileIcon.svg";
+import { Link } from "react-router-dom";
 
 // TODO: Should we make this sticky or scrollable?
 export const MobileTopNavBar: React.FC = () => (
   <Container>
     <LogoContainer src={RLifeIcon} />
-    <ProfileContainer src={ProfileIcon} />
+    <Link to="/settings">
+      <ProfileContainer src={ProfileIcon} />
+    </Link>
   </Container>
-)
+);
 
 const Container = styled.div`
   display: flex;
@@ -24,7 +27,7 @@ const Container = styled.div`
 const LogoContainer = styled.img`
   height: auto;
   width: 48px;
-`
+`;
 
 const ProfileContainer = styled.img`
   height: auto;

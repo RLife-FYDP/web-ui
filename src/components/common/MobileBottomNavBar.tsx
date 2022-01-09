@@ -27,6 +27,7 @@ import { observer } from "mobx-react";
 import { NotificationBarViewState } from "./NotificationBarViewState";
 import { observable } from "mobx";
 import { Signup } from "../authentication/Signup";
+import { Settings } from "../settings/Settings";
 
 @observer
 export class MobileBottomNavBar extends Component {
@@ -60,6 +61,9 @@ export class MobileBottomNavBar extends Component {
         </Route>
         <Route path="/signup">
           <Signup />
+        </Route>
+        <Route exact path="/settings">
+          <Settings />
         </Route>
       </Switch>
     );
@@ -108,7 +112,8 @@ export class MobileBottomNavBar extends Component {
             <>
               <StickyContainer>
                 <MobileTopNavBar />
-                {this.notificationsViewState.isNotificationsVisible ? (
+                {this.notificationsViewState.isNotificationsVisible &&
+                !this.path.includes("settings") ? (
                   <NotificationBar viewState={this.notificationsViewState} />
                 ) : null}
                 <ComponentContainer
