@@ -7,15 +7,15 @@ import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import {
   AddTaskViewState,
-  DefaultOptions,
   RRuleFrequencies,
   RRuleWeekdayIntervals,
 } from "./AddTaskViewState";
-import { DatePicker, ToggleButton } from "@mui/lab";
+import { DatePicker } from "@mui/lab";
 import { styled as muiStyled } from "@mui/system";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { FormControl, MenuItem, Select } from "@mui/material";
+import { FormControl, MenuItem, Select, ToggleButton } from "@mui/material";
 import RRule, { Frequency, Weekday } from "rrule";
+import { Loading } from "../common/Loading";
 
 interface AddTaskProps {}
 
@@ -32,7 +32,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
   constructor(props: AddTaskProps) {
     super(props);
     this.state = {
-      isRepeatableEvent: true,
+      isRepeatableEvent: false,
     };
   }
 
@@ -71,166 +71,218 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
     const { newTask } = this.viewState;
     return (
       <Container>
-        <HeaderContainer>
-          <StyledLink to="/tasks">Cancel</StyledLink>
-          <Header>New Task</Header>
-          <StyledLink to="/tasks" onClick={this.viewState.submitNewTask}>
-            Add
-          </StyledLink>
-        </HeaderContainer>
-        <FormContainer>
-          <ToggleButtonGroup
-            value={this.state.isRepeatableEvent}
-            exclusive
-            onChange={(_, isRepeatableEvent) => {
-              this.handleIsRepeatableEventChange(isRepeatableEvent);
-            }}
-          >
-            <StyledToggleButton value={false}>One time task</StyledToggleButton>
-            <StyledToggleButton value={true}>Repeating task</StyledToggleButton>
-          </ToggleButtonGroup>
-          <Input
-            placeholder="What is your task?"
-            name="taskName"
-            value={newTask.taskName ?? ""}
-            onChange={this.updateTaskInput}
-          ></Input>
-          <DescriptionInput
-            placeholder="Description..."
-            name="description"
-            value={newTask.description ?? ""}
-            onChange={this.updateTaskTextField}
-          ></DescriptionInput>
-          <Input
-            placeholder="Assign to"
-            name="assignee"
-            value={newTask.assignee ?? ""}
-            onChange={this.updateTaskInput}
-          ></Input>
-          <DatePicker
-            onChange={(date) =>
-              this.updateDateFields(
-                "startDate",
-                date == undefined ? null : new Date(date)
-              )
-            }
-            value={newTask.startDate ?? null}
-            renderInput={({ inputRef, inputProps }) => (
+        {this.viewState.roommates ? (
+          <>
+            {" "}
+            <HeaderContainer>
+              <StyledLink to="/tasks">Cancel</StyledLink>
+              <Header>New Task</Header>
+              <StyledLink to="/tasks" onClick={this.viewState.submitNewTask}>
+                Add
+              </StyledLink>
+            </HeaderContainer>
+            <FormContainer>
+              <ToggleButtonGroup
+                value={this.state.isRepeatableEvent}
+                exclusive
+                onChange={(_, isRepeatableEvent) => {
+                  this.handleIsRepeatableEventChange(isRepeatableEvent);
+                }}
+              >
+                <StyledToggleButton value={false}>
+                  One time task
+                </StyledToggleButton>
+                <StyledToggleButton value={true}>
+                  Repeating task
+                </StyledToggleButton>
+              </ToggleButtonGroup>
               <Input
-                ref={inputRef}
-                {...inputProps}
-                placeholder={
-                  this.state.isRepeatableEvent ? "Start Date" : "Due Date"
-                }
+                placeholder="What is your task?"
+                name="taskName"
+                value={newTask.taskName ?? ""}
+                onChange={this.updateTaskInput}
               ></Input>
-            )}
-          />
-          {this.state.isRepeatableEvent ? (
-            <>
-              <DatePicker
-                onChange={(date) =>
-                  this.viewState.setNewRRuleValueByKey({ until: date })
-                }
-                value={newTask.rruleOptions?.until ?? null}
-                renderInput={({ inputRef, inputProps }) => (
-                  <Input
-                    ref={inputRef}
-                    {...inputProps}
-                    placeholder="Until"
-                  ></Input>
-                )}
-              />
+              <DescriptionInput
+                placeholder="Description..."
+                name="description"
+                value={newTask.description ?? ""}
+                onChange={this.updateTaskTextField}
+              ></DescriptionInput>
               <FormControl fullWidth>
                 <StyledSelect
                   displayEmpty
-                  value={newTask.rruleOptions?.freq ?? Frequency.DAILY}
+                  multiple
+                  value={newTask.assignee ?? []}
                   onChange={(event) => {
-                    const value = event.target.value as string;
-                    this.viewState.setNewRRuleValueByKey({
-                      freq: parseInt(value),
+                    const inputValue = event.target.value as string | string[];
+                    const values: string[] =
+                      typeof inputValue === "string"
+                        ? inputValue.split(",")
+                        : inputValue;
+
+                    const valuesAsInt = values
+                      .map((val) => parseInt(val))
+                      .filter((val) => !isNaN(val));
+
+                    this.viewState.setNewTaskValueByKey({
+                      assignee: valuesAsInt,
                     });
                   }}
-                  renderValue={(value) => {
-                    const valueAsNumber = parseInt(value as string);
-                    if (isNaN(valueAsNumber)) {
+                  renderValue={(values) => {
+                    if (Array.isArray(values) && values.length === 0) {
                       return (
                         <StyledSelectValuePlaceholder>
-                          Repeat every...
+                          Assignees
                         </StyledSelectValuePlaceholder>
                       );
                     }
+
                     return (
                       <StyledSelectValueHolder>
-                        Repeat {this.getRRuleFreqNameFromEnum(valueAsNumber)}
+                        {(values as number[])
+                          .map((id) => this.viewState.getNameById(id))
+                          .join(", ")}
                       </StyledSelectValueHolder>
                     );
                   }}
                 >
-                  {RRuleFrequencies.map((freq) => (
-                    <MenuItem value={freq.value}>{freq.label}</MenuItem>
+                  {this.viewState.roommates?.map((roommate, index) => (
+                    <MenuItem key={index} value={roommate.id}>
+                      {roommate.first_name + " " + roommate.last_name}
+                    </MenuItem>
                   ))}
                 </StyledSelect>
               </FormControl>
-              {newTask.rruleOptions?.freq === Frequency.WEEKLY ? (
-                <FormControl fullWidth>
-                  <StyledSelect
-                    displayEmpty
-                    multiple
-                    value={newTask.rruleOptions?.byweekday ?? []}
-                    onChange={(event) => {
-                      const inputValue = event.target.value as
-                        | string
-                        | string[];
-                      const values: string[] =
-                        typeof inputValue === "string"
-                          ? inputValue.split(",")
-                          : inputValue;
-
-                      const valuesAsInt = values
-                        .map((val) => parseInt(val))
-                        .filter((val) => !isNaN(val));
-                      this.viewState.setNewRRuleValueByKey({
-                        byweekday:
-                          valuesAsInt.length === 0 ? null : valuesAsInt,
-                      });
-                    }}
-                    renderValue={(values) => {
-                      if (Array.isArray(values) && values.length === 0) {
+              <DatePicker
+                onChange={(date) =>
+                  this.updateDateFields(
+                    "startDate",
+                    date == undefined ? null : new Date(date)
+                  )
+                }
+                value={newTask.startDate ?? null}
+                renderInput={({ inputRef, inputProps }) => (
+                  <Input
+                    ref={inputRef}
+                    {...inputProps}
+                    placeholder={
+                      this.state.isRepeatableEvent ? "Start Date" : "Due Date"
+                    }
+                  ></Input>
+                )}
+              />
+              {this.state.isRepeatableEvent ? (
+                <>
+                  <DatePicker
+                    onChange={(date) =>
+                      this.viewState.setNewRRuleValueByKey({ until: date })
+                    }
+                    value={newTask.rruleOptions?.until ?? null}
+                    renderInput={({ inputRef, inputProps }) => (
+                      <Input
+                        ref={inputRef}
+                        {...inputProps}
+                        placeholder="Until"
+                      ></Input>
+                    )}
+                  />
+                  <FormControl fullWidth>
+                    <StyledSelect
+                      displayEmpty
+                      value={newTask.rruleOptions?.freq ?? Frequency.DAILY}
+                      onChange={(event) => {
+                        const value = event.target.value as string;
+                        this.viewState.setNewRRuleValueByKey({
+                          freq: parseInt(value),
+                        });
+                      }}
+                      renderValue={(value) => {
+                        const valueAsNumber = parseInt(value as string);
+                        if (isNaN(valueAsNumber)) {
+                          return (
+                            <StyledSelectValuePlaceholder>
+                              Repeat every...
+                            </StyledSelectValuePlaceholder>
+                          );
+                        }
                         return (
-                          <StyledSelectValuePlaceholder>
-                            Days to repeat
-                          </StyledSelectValuePlaceholder>
+                          <StyledSelectValueHolder>
+                            Repeat{" "}
+                            {this.getRRuleFreqNameFromEnum(valueAsNumber)}
+                          </StyledSelectValueHolder>
                         );
-                      }
+                      }}
+                    >
+                      {RRuleFrequencies.map((freq) => (
+                        <MenuItem value={freq.value}>{freq.label}</MenuItem>
+                      ))}
+                    </StyledSelect>
+                  </FormControl>
+                  {newTask.rruleOptions?.freq === Frequency.WEEKLY ? (
+                    <FormControl fullWidth>
+                      <StyledSelect
+                        displayEmpty
+                        multiple
+                        value={newTask.rruleOptions?.byweekday ?? []}
+                        onChange={(event) => {
+                          const inputValue = event.target.value as
+                            | string
+                            | string[];
+                          const values: string[] =
+                            typeof inputValue === "string"
+                              ? inputValue.split(",")
+                              : inputValue;
 
-                      return (
-                        <StyledSelectValueHolder>
-                          {(values as number[])
-                            .sort()
-                            .map((day) => new Weekday(day).toString())
-                            .join(", ")}
-                        </StyledSelectValueHolder>
-                      );
-                    }}
-                  >
-                    {RRuleWeekdayIntervals.map((option, index) => (
-                      <MenuItem key={index} value={option.weekday}>
-                        {option.toString()}
-                      </MenuItem>
-                    ))}
-                  </StyledSelect>
-                </FormControl>
+                          const valuesAsInt = values
+                            .map((val) => parseInt(val))
+                            .filter((val) => !isNaN(val));
+                          this.viewState.setNewRRuleValueByKey({
+                            byweekday:
+                              valuesAsInt.length === 0 ? null : valuesAsInt,
+                          });
+                        }}
+                        renderValue={(values) => {
+                          if (Array.isArray(values) && values.length === 0) {
+                            return (
+                              <StyledSelectValuePlaceholder>
+                                Days to repeat
+                              </StyledSelectValuePlaceholder>
+                            );
+                          }
+
+                          return (
+                            <StyledSelectValueHolder>
+                              {(values as number[])
+                                .sort()
+                                .map((day) => new Weekday(day).toString())
+                                .join(", ")}
+                            </StyledSelectValueHolder>
+                          );
+                        }}
+                      >
+                        {RRuleWeekdayIntervals.map((option, index) => (
+                          <MenuItem key={index} value={option.weekday}>
+                            {option.toString()}
+                          </MenuItem>
+                        ))}
+                      </StyledSelect>
+                    </FormControl>
+                  ) : null}
+                  <RRuleDateText>{this.viewState.rruleText}</RRuleDateText>
+                </>
               ) : null}
-              <RRuleDateText>{this.viewState.rruleText}</RRuleDateText>
-            </>
-          ) : null}
-        </FormContainer>
+            </FormContainer>
+          </>
+        ) : (
+          <Loading />
+        )}
       </Container>
     );
   }
 }
 
 const Container = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   width: calc(100% - 16px);

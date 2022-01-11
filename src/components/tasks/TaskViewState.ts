@@ -34,6 +34,7 @@ export class TaskViewState {
   }
 
   async init() {
+    // TODO: need to get suite id - currently hard code as 4
     const response = await axios.get("http://localhost:8080/suites/4/tasks");
     this.responseData = response.data;
     this.parseResponse();

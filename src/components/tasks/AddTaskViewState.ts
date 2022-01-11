@@ -1,3 +1,4 @@
+import axios from "axios";
 /* eslint-disable eqeqeq */
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import RRule, { Frequency, Options } from "rrule";
@@ -49,10 +50,15 @@ interface NewTaskProps {
   taskName: string;
   description?: string;
   tags?: string;
-  assignee?: string;
-  // TODO: schedule needs to be some object that is cross compatible
+  assignee?: number[];
   startDate?: Date;
   rruleOptions?: Options;
+}
+
+interface ResponseProps {
+  first_name: string;
+  last_name: string;
+  id: number;
 }
 
 export class AddTaskViewState {
@@ -60,8 +66,22 @@ export class AddTaskViewState {
     taskName: "",
   };
 
+  @observable private roommateData?: ResponseProps[];
+
   constructor() {
     makeAutoObservable(this);
+    this.init();
+  }
+
+  async init() {
+    // TODO: fix hardcode of roomid = 4
+    const response = await axios.get("http://localhost:8080/suites/4/users");
+    this.roommateData = response.data;
+  }
+
+  @computed
+  get roommates(): ResponseProps[] | undefined {
+    return this.roommateData;
   }
 
   @computed
@@ -90,6 +110,16 @@ export class AddTaskViewState {
       ...this.newTask.rruleOptions,
       ...kVPairUpdate,
     };
+  };
+
+  getNameById = (
+    id: number,
+    includeLastName: boolean = false
+  ): string | undefined => {
+    const roommate = this.roommateData?.find((roommate) => roommate.id === id);
+    return includeLastName
+      ? `${roommate?.first_name} ${roommate?.last_name}`
+      : roommate?.first_name;
   };
 
   submitNewTask = () => {
