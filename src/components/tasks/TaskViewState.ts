@@ -1,10 +1,13 @@
 import axios from "axios";
-import { computed, makeAutoObservable } from "mobx";
+import _ from "lodash";
+import { action, computed, makeAutoObservable, observable } from "mobx";
+import { NumberLiteralType } from "typescript";
 
 export interface SingleTaskProps {
-  title: String;
-  onRepeat: Boolean;
-  assignee: String;
+  id: number;
+  title: string;
+  onRepeat: boolean;
+  assignee: number[];
 }
 
 interface TaskProps {
@@ -12,7 +15,19 @@ interface TaskProps {
   taskDetails: SingleTaskProps[];
 }
 
+interface ResponseProps {
+  completed: boolean;
+  due_date: string;
+  points: NumberLiteralType;
+  title: string;
+  id: number;
+  users: { id: number }[];
+}
+
 export class TaskViewState {
+  private responseData?: ResponseProps[];
+  @observable private tasks?: TaskProps[];
+
   constructor() {
     makeAutoObservable(this);
     this.init();
@@ -20,56 +35,52 @@ export class TaskViewState {
 
   async init() {
     const response = await axios.get("http://localhost:8080/suites/4/tasks");
-    console.log(response);
+    this.responseData = response.data;
+    this.parseResponse();
+  }
+
+  @action
+  parseResponse() {
+    if (this.responseData === undefined || this.responseData?.length === 0) {
+      return;
+    }
+
+    const taskSortedByDate = this.responseData.sort((taskA, taskB) => {
+      const dateA = new Date(taskA.due_date);
+      const dateB = new Date(taskB.due_date);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    const processedTasksByDate = _.groupBy(taskSortedByDate, (task) => {
+      const dateObject = new Date(task.due_date);
+      const startOfDay = dateObject.setHours(0, 0, 0, 0);
+      const today = new Date().setHours(0, 0, 0, 0);
+      const history = new Date(0).valueOf();
+      // grouping everything that is overdue into "yesterday"
+      return startOfDay < today ? history : startOfDay;
+    });
+
+    const taskDateKeys = Object.keys(processedTasksByDate);
+
+    this.tasks = taskDateKeys.map((key) => {
+      const values = processedTasksByDate[key];
+      return {
+        taskSection: new Date(key),
+        taskDetails: values.map((task) => {
+          return {
+            id: task.id,
+            title: task.title,
+            // TODO: will require rrule object
+            onRepeat: true,
+            assignee: task.users.map((obj) => obj.id),
+          };
+        }),
+      };
+    });
   }
 
   @computed
-  get testData(): TaskProps[] {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    return [
-      {
-        taskSection: today,
-        taskDetails: [
-          {
-            title: "Wash Dishes",
-            onRepeat: true,
-            assignee: "Austin",
-          },
-          {
-            title: "Wash Dishes",
-            onRepeat: false,
-            assignee: "Austin",
-          },
-          {
-            title: "Wash Dishes",
-            onRepeat: true,
-            assignee: "Austin",
-          },
-        ],
-      },
-      {
-        taskSection: tomorrow,
-        taskDetails: [
-          {
-            title: "Wash Dishes",
-            onRepeat: true,
-            assignee: "Austin",
-          },
-          {
-            title: "Wash Dishes",
-            onRepeat: true,
-            assignee: "Austin",
-          },
-          {
-            title: "Wash Dishes",
-            onRepeat: true,
-            assignee: "Austin",
-          },
-        ],
-      },
-    ];
+  get assignedTasks(): TaskProps[] | undefined {
+    return this.tasks;
   }
 }

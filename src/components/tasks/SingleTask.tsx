@@ -9,7 +9,7 @@ import { ReactComponent as RepeatIcon } from "../../icons/RepeatIcon.svg";
 export const SingleTask: React.FC<SingleTaskProps> = ({
   title,
   assignee,
-  onRepeat
+  onRepeat,
 }) => {
   return (
     <Container>
@@ -58,7 +58,7 @@ const Title = styled.p`
   font-size: 24px;
 `;
 
-const Assignee = styled.caption`
+const Assignee = styled.p`
   color: ${COLORS.NavyBlue};
 `;
 

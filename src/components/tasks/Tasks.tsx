@@ -2,6 +2,7 @@ import { observable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import styled from "styled-components";
+import { Loading } from "../common/Loading";
 import { AddTaskButton } from "./AddTaskButton";
 import { SingleTask } from "./SingleTask";
 import { TaskViewState } from "./TaskViewState";
@@ -11,26 +12,37 @@ export class Tasks extends React.Component {
   @observable private viewState = new TaskViewState();
 
   render() {
+    const today = new Date();
+    const tasks = this.viewState.assignedTasks;
     return (
       <Container>
-        {this.viewState.testData.map((data) => {
-          return (
-            <SectionContainer>
-              <SectionTitle>{data.taskSection.toDateString()}</SectionTitle>
-              {data.taskDetails.map((details, index) => {
-                return (
-                  <SingleTask
-                    key={index}
-                    title={details.title}
-                    onRepeat={details.onRepeat}
-                    assignee={details.assignee}
-                  />
-                );
-              })}
-            </SectionContainer>
-          );
-        })}
-        <StyledAddTaskButton />
+        {tasks === undefined ? (
+          <Loading />
+        ) : (
+          tasks.map((data, index) => {
+            const header =
+              data.taskSection < today
+                ? "Overdue"
+                : data.taskSection.toString();
+            return (
+              <SectionContainer key={index}>
+                <SectionTitle>{header}</SectionTitle>
+                {data.taskDetails.map((details) => {
+                  return (
+                    <SingleTask
+                      key={details.id}
+                      id={details.id}
+                      title={details.title}
+                      onRepeat={details.onRepeat}
+                      assignee={details.assignee}
+                    />
+                  );
+                })}
+              </SectionContainer>
+            );
+          })
+        )}
+        {tasks === undefined ? null : <StyledAddTaskButton />}
       </Container>
     );
   }
@@ -40,7 +52,7 @@ const Container = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
-  max-height: 100%;
+  height: 100%;
   margin: 8px;
   overflow-y: scroll;
 `;

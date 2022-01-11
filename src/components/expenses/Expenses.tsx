@@ -68,7 +68,7 @@ const Title = styled.h1`
   font-size: 24px;
 `;
 
-const Caption = styled.caption`
+const Caption = styled.p`
   font-size: 14px;
   color: ${COLORS.Yellow};
 `;
