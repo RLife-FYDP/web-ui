@@ -6,7 +6,7 @@ import COLORS from "../../commonUtils/colors";
 
 import RLifeIcon from "../../icons/RLifeIcon.svg";
 import { Intro } from "./Intro";
-import { SignupId } from "./SignupId";
+import { SignupForm } from "./SignupForm";
 import { SignupViewState, State as AuthState } from "./SignupViewState";
 
 @observer
@@ -41,7 +41,7 @@ export class Signup extends React.Component {
       case AuthState.SIGNUP_EMAIL_VERIFICATION:
         return null;
       case AuthState.SIGNUP_ID:
-        return <SignupId />;
+        return <SignupForm />;
       case AuthState.LOGIN_ID:
         return null;
       case AuthState.ROOM_OPTIONS:
@@ -58,9 +58,6 @@ export class Signup extends React.Component {
       <Container>
         <LogoContainer src={RLifeIcon} />
         {this.renderAuthStateComponent()}
-        {this.viewState.authState === AuthState.INTRO ? null : (
-          <NextButton onClick={this.onClickStateHandler}>Next</NextButton>
-        )}
       </Container>
     );
   }
