@@ -68,6 +68,8 @@ const Container = styled.div`
 
 const FixedCanvasDraw = styled(CanvasDraw).attrs({
   enablePanAndZoom: true,
+  canvasWidth: 800,
+  canvasHeight: 800,
 })``;
 
 const ColorPickerContainer = styled.div`
