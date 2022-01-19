@@ -4,15 +4,17 @@ import styled from "styled-components";
 import CanvasDraw from "react-canvas-draw";
 import COLORS from "../../commonUtils/colors";
 
+import { ReactComponent as UndoIcon } from "../../icons/Undo.svg";
+
 interface CanvasProps {}
 
 interface CanvasState {
   canvasBrushColor: string;
 }
 
-// TODO: need to add undo and brush selectors
 @observer
 export class Canvas extends React.Component<CanvasProps, CanvasState> {
+  // used for accessing saved canvas drawing
   private canvasRef: CanvasDraw | null = null;
 
   constructor(props: CanvasProps) {
@@ -25,22 +27,32 @@ export class Canvas extends React.Component<CanvasProps, CanvasState> {
   render() {
     return (
       <Container>
-        <ColorPickerContainer>
-          {Object.keys(COLORS).map((key) => {
-            const colorCode = COLORS[key as keyof typeof COLORS];
-            return (
-              <ColorPalette
-                key={colorCode}
-                color={colorCode}
-                onClick={() => {
-                  this.setState({
-                    canvasBrushColor: colorCode,
-                  });
-                }}
-              />
-            );
-          })}
-        </ColorPickerContainer>
+        <ToolSelectionContainer>
+          <ColorPickerContainer>
+            {Object.keys(COLORS).map((key) => {
+              const colorCode = COLORS[key as keyof typeof COLORS];
+              return (
+                <ColorPalette
+                  key={colorCode}
+                  color={colorCode}
+                  onClick={() => {
+                    this.setState({
+                      canvasBrushColor: colorCode,
+                    });
+                  }}
+                />
+              );
+            })}
+          </ColorPickerContainer>
+          <CurrentlySelectedContainer>
+            <CurrentBrush selectedColor={this.state.canvasBrushColor} />
+            <UndoIcon
+              onClick={() => {
+                this.canvasRef?.undo();
+              }}
+            />
+          </CurrentlySelectedContainer>
+        </ToolSelectionContainer>
         <FixedCanvasDraw
           ref={(ref) => (this.canvasRef = ref)}
           lazyRadius={0}
@@ -48,7 +60,8 @@ export class Canvas extends React.Component<CanvasProps, CanvasState> {
           brushRadius={2}
           onChange={(canvas) => {
             // TODO: do I need debounce? this is the stringified data
-            console.log(this.canvasRef?.getSaveData());
+            // can access this through this.canvasRef.getSavedData();
+            console.log(canvas.getSaveData());
           }}
         />
       </Container>
@@ -73,12 +86,6 @@ const FixedCanvasDraw = styled(CanvasDraw).attrs({
 })``;
 
 const ColorPickerContainer = styled.div`
-  z-index: 100;
-  box-sizing: border-box;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translatex(-50%);
   display: flex;
   flex-direction: row;
   margin-top: 16px;
@@ -94,4 +101,32 @@ const ColorPalette = styled.div<{
   width: 30px;
   height: 30px;
   background: ${({ color }) => color};
+`;
+
+const ToolSelectionContainer = styled.div`
+  z-index: 100;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+`;
+
+const CurrentlySelectedContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin: 8px;
+`;
+
+const CurrentBrush = styled.div<{
+  selectedColor: string;
+}>`
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+  border-radius: 50%;
+  border: 1px solid ${COLORS.Black};
+  background: ${({ selectedColor }) => selectedColor};
 `;

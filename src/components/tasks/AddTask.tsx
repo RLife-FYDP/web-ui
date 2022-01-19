@@ -14,7 +14,7 @@ import { DatePicker } from "@mui/lab";
 import { styled as muiStyled } from "@mui/system";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { FormControl, MenuItem, Select, ToggleButton } from "@mui/material";
-import RRule, { Frequency, Weekday } from "rrule";
+import { Frequency, Weekday } from "rrule";
 import { Loading } from "../common/Loading";
 
 interface AddTaskProps {}
