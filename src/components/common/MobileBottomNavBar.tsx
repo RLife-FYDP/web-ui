@@ -28,6 +28,7 @@ import { NotificationBarViewState } from "./NotificationBarViewState";
 import { observable } from "mobx";
 import { Signup } from "../authentication/Signup";
 import { Settings } from "../settings/Settings";
+import { withAuthentication } from "../../commonUtils/withAuthentication";
 
 @observer
 export class MobileBottomNavBar extends Component {
@@ -39,31 +40,31 @@ export class MobileBottomNavBar extends Component {
     const NavigationRouter = (
       <Switch>
         <Route exact path="/">
-          <Chat />
+          {withAuthentication(Chat)}
         </Route>
         <Route exact path="/tasks">
-          <Tasks />
+          {withAuthentication(Tasks)}
         </Route>
         <Route exact path="/tasks/add">
-          <AddTask />
+          {withAuthentication(AddTask)}
         </Route>
         <Route path="/achievements">
-          <Achievements />
+          {withAuthentication(Achievements)}
         </Route>
         <Route exact path="/expenses">
-          <Expenses />
+          {withAuthentication(Expenses)}
         </Route>
         <Route exact path="/expenses/add">
-          <AddExpense />
+          {withAuthentication(AddExpense)}
         </Route>
         <Route path="/canvas">
-          <Canvas />
+          {withAuthentication(Canvas)}
         </Route>
         <Route path="/signup">
           <Signup />
         </Route>
         <Route exact path="/settings">
-          <Settings />
+          {withAuthentication(Settings)}
         </Route>
       </Switch>
     );
