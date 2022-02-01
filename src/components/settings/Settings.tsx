@@ -3,6 +3,8 @@ import { observer } from "mobx-react";
 import { Component } from "react";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
+import { AccessTokenStorageKey, RefreshTokenStorageKey, SignupPageUrl } from "../../commonUtils/consts";
+import { Button } from "../common/Button";
 import { SettingsViewState } from "./SettingsViewState";
 
 @observer
@@ -23,9 +25,16 @@ export class Settings extends Component {
             ))}
           </SectionContainer>
         ))}
+        <Button onClick={logout} text={'Logout'}/>
       </Container>
     );
   }
+}
+
+function logout() {
+  localStorage.removeItem(AccessTokenStorageKey);
+  localStorage.removeItem(RefreshTokenStorageKey)
+  window.location.href = SignupPageUrl
 }
 
 const Container = styled.div`
