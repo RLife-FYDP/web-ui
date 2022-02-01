@@ -4,6 +4,13 @@
 yarn start
 ```
 
+## Testing account
+
+Log in with the following account to test the app:
+
+Email: tyler1@gmail.com
+Password: password
+
 ## API Docs
 
 Ongoing discussion on APIs needed: [Link](https://docs.google.com/spreadsheets/d/1mtEtLnnVQl1BV7zaE0db-a468OKGiWccbkiW0Aadz0I/edit#gid=0)
