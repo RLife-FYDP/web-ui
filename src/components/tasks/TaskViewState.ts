@@ -2,6 +2,7 @@ import axios from "axios";
 import _ from "lodash";
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import { NumberLiteralType } from "typescript";
+import { authenticatedGetRequest, getUser } from "../../api/apiClient";
 
 export interface SingleTaskProps {
   id: number;
@@ -34,9 +35,10 @@ export class TaskViewState {
   }
 
   async init() {
-    // TODO: need to get suite id - currently hard code as 4
-    const response = await axios.get("http://localhost:8080/suites/4/tasks");
-    this.responseData = response.data;
+    const user = await getUser()
+    const res = await authenticatedGetRequest(`/suites/${user.suiteId}/tasks`);
+    const data = await res?.json()
+    this.responseData = data;
     this.parseResponse();
   }
 
