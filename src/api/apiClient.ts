@@ -10,7 +10,7 @@ interface JwtToken {
 const BASE_URL = 'http://localhost:8080';
 
 const refreshAccessToken = async (refreshToken: string) => {
-  const res = await fetch(BASE_URL + '/refresh',
+  const res = await fetch(BASE_URL + '/auth/refresh',
     { method: 'POST', body: JSON.stringify({refresh_token: refreshToken}), headers: { 'Content-Type': 'application/json' }}
   );
   if (res.status !== 200) {
@@ -31,7 +31,7 @@ export const authenticatedGetRequest = async (url: string) => {
     window.location.href = SignupPageUrl
     return;
   }
-  const res = await axios.get(BASE_URL + url, {headers: {'Authorization': `Bearer ${accessToken}`}})
+  const res = await fetch(BASE_URL + url, {headers: {'Authorization': `Bearer ${accessToken}`}})
   if (res.status === 401) {
     // refresh token
     const newAccessToken = await refreshAccessToken(refreshToken)
@@ -39,8 +39,10 @@ export const authenticatedGetRequest = async (url: string) => {
       throw new Error('unable to refresh token')
     }
     accessToken = newAccessToken
+    return fetch(BASE_URL + url, {headers: {'Authorization': `Bearer ${accessToken}`}})
+  } else {
+    return res;
   }
-  return fetch(BASE_URL + url)
 } 
 
 export const getUser = async() => {
