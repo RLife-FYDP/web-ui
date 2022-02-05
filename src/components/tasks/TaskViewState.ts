@@ -1,4 +1,3 @@
-import axios from "axios";
 import _ from "lodash";
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import { NumberLiteralType } from "typescript";
