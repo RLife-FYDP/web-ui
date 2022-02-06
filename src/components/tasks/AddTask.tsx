@@ -7,6 +7,7 @@ import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import {
   AddTaskViewState,
+  NewTaskProps,
   RRuleFrequencies,
   RRuleWeekdayIntervals,
 } from "./AddTaskViewState";
@@ -17,7 +18,10 @@ import { FormControl, MenuItem, Select, ToggleButton } from "@mui/material";
 import { Frequency, Weekday } from "rrule";
 import { Loading } from "../common/Loading";
 
-interface AddTaskProps {}
+interface AddTaskProps {
+  taskToEdit?: NewTaskProps | undefined;
+  dismiss?: () => void;
+}
 
 interface AddTaskState {
   isRepeatableEvent: boolean;
@@ -25,7 +29,7 @@ interface AddTaskState {
 
 @observer
 export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
-  @observable private viewState = new AddTaskViewState();
+  @observable private viewState = new AddTaskViewState(this.props.taskToEdit);
 
   // Not sure why @observable isn't working on isRepeatableEvent...
   // will resort to state for now
@@ -75,10 +79,12 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
           <>
             {" "}
             <HeaderContainer>
-              <StyledLink to="/tasks">Cancel</StyledLink>
+              <StyledLink to="/tasks" onClick={this.props.dismiss}>
+                Cancel
+              </StyledLink>
               <Header>New Task</Header>
               <StyledLink to="/tasks" onClick={this.viewState.submitNewTask}>
-                Add
+                {this.props.taskToEdit ? "Save" : "Add"}
               </StyledLink>
             </HeaderContainer>
             <FormContainer>
@@ -270,6 +276,11 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
                   ) : null}
                   <RRuleDateText>{this.viewState.rruleText}</RRuleDateText>
                 </>
+              ) : null}
+              {this.props.taskToEdit ? (
+                <StyledLink to="/tasks" onClick={() => console.log("delete")}>
+                  Delete
+                </StyledLink>
               ) : null}
             </FormContainer>
           </>

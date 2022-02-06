@@ -6,13 +6,19 @@ import { SingleTaskProps } from "./TaskViewState";
 
 import { ReactComponent as RepeatIcon } from "../../icons/RepeatIcon.svg";
 
-export const SingleTask: React.FC<SingleTaskProps> = ({
+interface SingleTaskViewProps {
+  onClick: (id: number) => void
+}
+
+export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
+  id,
   title,
   assignee,
   onRepeat,
+  onClick
 }) => {
   return (
-    <Container>
+    <Container onClick={() => onClick(id)}>
       <InformationContainer>
         <Checkbox
           onClick={() => {

@@ -46,7 +46,7 @@ export const RRuleFrequencies = [
 // (e.g. min weekly = every week, max weekly = every month)
 export const RRuleWeeklyIntervals = [1, 2, 3, 4];
 
-interface NewTaskProps {
+export interface NewTaskProps {
   taskName: string;
   description?: string;
   tags?: string;
@@ -68,9 +68,13 @@ export class AddTaskViewState {
 
   @observable private roommateData?: ResponseProps[];
 
-  constructor() {
+  constructor(taskToEdit?: NewTaskProps) {
     makeAutoObservable(this);
     this.init();
+
+    this.newTask = taskToEdit ?? {
+      taskName: "",
+    };
   }
 
   async init() {

@@ -2,7 +2,9 @@ import _ from "lodash";
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import { NumberLiteralType } from "typescript";
 import { authenticatedGetRequest, getUser } from "../../api/apiClient";
+import { NewTaskProps } from "./AddTaskViewState";
 
+// TODO: this hsould be NewTaskProps as well
 export interface SingleTaskProps {
   id: number;
   title: string;
@@ -10,7 +12,7 @@ export interface SingleTaskProps {
   assignee: number[];
 }
 
-interface TaskProps {
+export interface TaskProps {
   taskSection: Date;
   taskDetails: SingleTaskProps[];
 }
@@ -34,11 +36,19 @@ export class TaskViewState {
   }
 
   async init() {
-    const user = await getUser()
+    const user = await getUser();
     const res = await authenticatedGetRequest(`/suites/${user.suiteId}/tasks`);
-    const data = await res?.json()
+    const data = await res?.json();
     this.responseData = data;
     this.parseResponse();
+  }
+
+  getTaskDetailsById(id: number): NewTaskProps | undefined {
+    return (
+      this.tasks?.forEach((taskSections) =>
+        taskSections.taskDetails.find((task) => task.id === id)
+      ) ?? undefined
+    );
   }
 
   @action

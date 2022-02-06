@@ -48,18 +48,14 @@ export class MobileBottomNavBar extends Component {
         <Route exact path="/tasks/add">
           {withAuthentication(AddTask)}
         </Route>
-        <Route path="/achievements">
-          {withAuthentication(Achievements)}
-        </Route>
+        <Route path="/achievements">{withAuthentication(Achievements)}</Route>
         <Route exact path="/expenses">
           {withAuthentication(Expenses)}
         </Route>
         <Route exact path="/expenses/add">
           {withAuthentication(AddExpense)}
         </Route>
-        <Route path="/canvas">
-          {withAuthentication(Canvas)}
-        </Route>
+        <Route path="/canvas">{withAuthentication(Canvas)}</Route>
         <Route path="/signup">
           <Signup />
         </Route>
