@@ -47,10 +47,12 @@ export const RRuleFrequencies = [
 export const RRuleWeeklyIntervals = [1, 2, 3, 4];
 
 export interface SingleTaskProps {
+  id?: number; // only for editing tasks
   title: string;
   description?: string;
   tags?: string;
   assignee?: number[];
+  // start date should be mandatory
   startDate?: Date;
   rruleOptions?: Options;
   // we can use lastUpdated to filter the rrule dates out
@@ -140,7 +142,7 @@ export class AddTaskViewState {
       assignee: this.newTask.assignee,
       startTime: this.newTask.startDate,
       points: 2,
-      lastCompleted: undefined,
+      lastCompleted: this.newTask.lastUpdated,
       rruleOption: rruleString,
     });
 

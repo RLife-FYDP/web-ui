@@ -1,8 +1,10 @@
+/* eslint-disable eqeqeq */
+import { RRule } from "rrule";
 import _ from "lodash";
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import { NumberLiteralType } from "typescript";
 import { authenticatedGetRequest, getUser } from "../../api/apiClient";
-import { SingleTaskProps } from "./AddTaskViewState";
+import { DefaultOptions, SingleTaskProps } from "./AddTaskViewState";
 
 export interface TaskProps {
   taskSection: Date;
@@ -10,12 +12,16 @@ export interface TaskProps {
 }
 
 interface ResponseProps {
-  completed: boolean;
-  due_date: string;
-  points: NumberLiteralType;
-  title: string;
   id: number;
-  users: { id: number }[];
+  title: string;
+  description?: string;
+  tags?: string;
+  assignee?: number[];
+  start_time: string;
+  rrule_option?: string;
+  // we can use lastUpdated to filter the rrule dates out
+  // via rrule.after(date) function
+  last_completed?: String;
 }
 
 export class TaskViewState {
@@ -35,13 +41,30 @@ export class TaskViewState {
     this.parseResponse();
   }
 
-  getTaskDetailsById(id: number): SingleTaskProps | undefined {
-    return (
-      this.tasks?.forEach((taskSections) =>
-        taskSections.taskDetails.find((task) => task.id === id)
-      ) ?? undefined
-    );
-  }
+  getTaskDetailsById = (id: number): SingleTaskProps | undefined => {
+    let task = this.responseData?.find((task) => task?.id === id);
+    if (task == undefined) {
+      return undefined;
+    }
+
+    let rrule;
+    if (task.rrule_option != undefined) {
+      rrule = {
+        ...DefaultOptions,
+        ...RRule.parseString(task.rrule_option),
+      };
+
+      return {
+        ...task,
+        rruleOptions: rrule,
+      };
+    }
+
+    return {
+      ...task,
+      rruleOptions: undefined,
+    };
+  };
 
   @action
   parseResponse() {
@@ -50,13 +73,13 @@ export class TaskViewState {
     }
 
     const taskSortedByDate = this.responseData.sort((taskA, taskB) => {
-      const dateA = new Date(taskA.due_date);
-      const dateB = new Date(taskB.due_date);
+      const dateA = new Date(taskA.start_time);
+      const dateB = new Date(taskB.start_time);
       return dateA.getTime() - dateB.getTime();
     });
 
     const processedTasksByDate = _.groupBy(taskSortedByDate, (task) => {
-      const dateObject = new Date(task.due_date);
+      const dateObject = new Date(task.start_time);
       const startOfDay = dateObject.setHours(0, 0, 0, 0);
       const today = new Date().setHours(0, 0, 0, 0);
       const history = new Date(0).valueOf();
@@ -76,7 +99,7 @@ export class TaskViewState {
             title: task.title,
             // TODO: will require rrule object
             // rruleOptions: task.rruleOptions,
-            assignee: task.users.map((obj) => obj.id),
+            assignee: task.assignee?.map((obj) => obj),
           };
         }),
       };

@@ -1,5 +1,5 @@
 /* eslint-disable eqeqeq */
-import { action, observable } from "mobx";
+import { observable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import styled from "styled-components";
