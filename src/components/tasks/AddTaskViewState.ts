@@ -136,7 +136,7 @@ export class AddTaskViewState {
       title: this.newTask.title,
       description: this.newTask.description,
       // TODO: temp tags
-      tags: 2,
+      tags: "2",
       assignee: this.newTask.assignee,
       startTime: this.newTask.startDate,
       points: 2,
@@ -144,7 +144,7 @@ export class AddTaskViewState {
       rruleOption: rruleString,
     });
 
-    const res = fetch("http://localhost:8080/tasks/create", {
+    fetch("http://localhost:8080/tasks/create", {
       method: "POST",
       body,
       headers: { "Content-Type": "application/json" },
