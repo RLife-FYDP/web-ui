@@ -72,8 +72,6 @@ export class AddTaskViewState {
   @observable private roommateData?: ResponseProps[];
 
   constructor(taskToEdit?: SingleTaskProps) {
-    axios.get("http://localhost:8080/suites/4");
-
     makeAutoObservable(this);
     this.init();
 
@@ -137,16 +135,16 @@ export class AddTaskViewState {
     const body = JSON.stringify({
       title: this.newTask.title,
       description: this.newTask.description,
-      tags: null,
+      // TODO: temp tags
+      tags: 2,
+      assignee: this.newTask.assignee,
+      startTime: this.newTask.startDate,
       points: 2,
-      lastCompleted: null,
+      lastCompleted: undefined,
       rruleOption: rruleString,
     });
-    // axios.post("http://localhost:8080/task", {
 
-    // });
-
-    const res = fetch("http://localhost:8080/task", {
+    const res = fetch("http://localhost:8080/tasks/create", {
       method: "POST",
       body,
       headers: { "Content-Type": "application/json" },
