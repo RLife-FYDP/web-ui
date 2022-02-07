@@ -46,13 +46,16 @@ export const RRuleFrequencies = [
 // (e.g. min weekly = every week, max weekly = every month)
 export const RRuleWeeklyIntervals = [1, 2, 3, 4];
 
-export interface NewTaskProps {
+export interface SingleTaskProps {
   taskName: string;
   description?: string;
   tags?: string;
   assignee?: number[];
   startDate?: Date;
   rruleOptions?: Options;
+  // we can use lastUpdated to filter the rrule dates out 
+  // via rrule.after(date) function
+  lastUpdated?: Date;
 }
 
 interface ResponseProps {
@@ -62,13 +65,13 @@ interface ResponseProps {
 }
 
 export class AddTaskViewState {
-  @observable newTask: NewTaskProps = {
+  @observable newTask: SingleTaskProps = {
     taskName: "",
   };
 
   @observable private roommateData?: ResponseProps[];
 
-  constructor(taskToEdit?: NewTaskProps) {
+  constructor(taskToEdit?: SingleTaskProps) {
     makeAutoObservable(this);
     this.init();
 
@@ -102,7 +105,7 @@ export class AddTaskViewState {
   }
 
   @action
-  setNewTaskValueByKey = (kVPairUpdate: Partial<NewTaskProps>) => {
+  setNewTaskValueByKey = (kVPairUpdate: Partial<SingleTaskProps>) => {
     this.newTask = { ...this.newTask, ...kVPairUpdate };
   };
 

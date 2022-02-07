@@ -7,7 +7,7 @@ import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import {
   AddTaskViewState,
-  NewTaskProps,
+  SingleTaskProps,
   RRuleFrequencies,
   RRuleWeekdayIntervals,
 } from "./AddTaskViewState";
@@ -19,7 +19,7 @@ import { Frequency, Weekday } from "rrule";
 import { Loading } from "../common/Loading";
 
 interface AddTaskProps {
-  taskToEdit?: NewTaskProps | undefined;
+  taskToEdit?: SingleTaskProps | undefined;
   dismiss?: () => void;
 }
 

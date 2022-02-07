@@ -21,6 +21,9 @@ export class Expenses extends React.Component {
           </TitleContainer>
           <AddExpenseButton to="/expenses/add">Add Expense</AddExpenseButton>
         </HeaderContainer>
+        <SimplifiedCaptionContainer>
+          <OrangeCaption>Simplified: You owe {"Austin"} $xx.xx</OrangeCaption>
+        </SimplifiedCaptionContainer>
         <ExpenseContainer>
           {this.viewState.testData.map((data, index) => (
             <SingleExpense
@@ -71,6 +74,14 @@ const Title = styled.h1`
 const Caption = styled.p`
   font-size: 14px;
   color: ${COLORS.Yellow};
+`;
+
+const SimplifiedCaptionContainer = styled.div`
+  margin-top: 8px;
+`;
+
+const OrangeCaption = styled(Caption)`
+  color: ${COLORS.Orange};
 `;
 
 const AddExpenseButton = styled(Link)`
