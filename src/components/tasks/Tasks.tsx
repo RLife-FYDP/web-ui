@@ -52,7 +52,7 @@ export class Tasks extends React.Component<{}, TasksState> {
                     <SingleTask
                       key={details.id}
                       id={details.id}
-                      taskName={details.taskName}
+                      title={details.title}
                       rruleOptions={details.rruleOptions}
                       assignee={details.assignee}
                       onClick={this.handleViewTask}

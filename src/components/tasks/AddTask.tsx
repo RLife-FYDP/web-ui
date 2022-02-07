@@ -104,8 +104,8 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
               </ToggleButtonGroup>
               <Input
                 placeholder="What is your task?"
-                name="taskName"
-                value={newTask.taskName ?? ""}
+                name="title"
+                value={newTask.title ?? ""}
                 onChange={this.updateTaskInput}
               ></Input>
               <DescriptionInput
@@ -169,6 +169,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
                 value={newTask.startDate ?? null}
                 renderInput={({ inputRef, inputProps }) => (
                   <Input
+                    type="date"
                     ref={inputRef}
                     {...inputProps}
                     placeholder={
@@ -180,9 +181,12 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
               {this.state.isRepeatableEvent ? (
                 <>
                   <DatePicker
-                    onChange={(date) =>
-                      this.viewState.setNewRRuleValueByKey({ until: date })
-                    }
+                    onChange={(date) => {
+                      if (date?.toString() === "Invalid Date") {
+                        return;
+                      }
+                      this.viewState.setNewRRuleValueByKey({ until: date });
+                    }}
                     value={newTask.rruleOptions?.until ?? null}
                     renderInput={({ inputRef, inputProps }) => (
                       <Input
@@ -219,8 +223,10 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
                         );
                       }}
                     >
-                      {RRuleFrequencies.map((freq) => (
-                        <MenuItem value={freq.value}>{freq.label}</MenuItem>
+                      {RRuleFrequencies.map((freq, i) => (
+                        <MenuItem key={i} value={freq.value}>
+                          {freq.label}
+                        </MenuItem>
                       ))}
                     </StyledSelect>
                   </FormControl>

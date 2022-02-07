@@ -13,7 +13,7 @@ interface SingleTaskViewProps {
 
 export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
   id,
-  taskName,
+  title: taskName,
   assignee,
   rruleOptions,
   onClick,

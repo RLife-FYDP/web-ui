@@ -73,7 +73,7 @@ export class TaskViewState {
         taskDetails: values.map((task) => {
           return {
             id: task.id,
-            taskName: task.title,
+            title: task.title,
             // TODO: will require rrule object
             // rruleOptions: task.rruleOptions,
             assignee: task.users.map((obj) => obj.id),

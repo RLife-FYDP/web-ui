@@ -47,13 +47,13 @@ export const RRuleFrequencies = [
 export const RRuleWeeklyIntervals = [1, 2, 3, 4];
 
 export interface SingleTaskProps {
-  taskName: string;
+  title: string;
   description?: string;
   tags?: string;
   assignee?: number[];
   startDate?: Date;
   rruleOptions?: Options;
-  // we can use lastUpdated to filter the rrule dates out 
+  // we can use lastUpdated to filter the rrule dates out
   // via rrule.after(date) function
   lastUpdated?: Date;
 }
@@ -66,17 +66,19 @@ interface ResponseProps {
 
 export class AddTaskViewState {
   @observable newTask: SingleTaskProps = {
-    taskName: "",
+    title: "",
   };
 
   @observable private roommateData?: ResponseProps[];
 
   constructor(taskToEdit?: SingleTaskProps) {
+    axios.get("http://localhost:8080/suites/4");
+
     makeAutoObservable(this);
     this.init();
 
     this.newTask = taskToEdit ?? {
-      taskName: "",
+      title: "",
     };
   }
 
@@ -131,8 +133,27 @@ export class AddTaskViewState {
 
   submitNewTask = () => {
     const rule = new RRule(this.newTask.rruleOptions);
-    console.log("rrule string: ", rule.toString());
-    console.log("rrule description: ", rule.toText());
-    console.log("rrule reaccurrances:", rule.all());
+    const rruleString = rule.toString();
+    const body = JSON.stringify({
+      title: this.newTask.title,
+      description: this.newTask.description,
+      tags: null,
+      points: 2,
+      lastCompleted: null,
+      rruleOption: rruleString,
+    });
+    // axios.post("http://localhost:8080/task", {
+
+    // });
+
+    const res = fetch("http://localhost:8080/task", {
+      method: "POST",
+      body,
+      headers: { "Content-Type": "application/json" },
+    });
+
+    // console.log("rrule string: ", rule.toString());
+    // console.log("rrule description: ", rule.toText());
+    // console.log("rrule reaccurrances:", rule.all());
   };
 }
