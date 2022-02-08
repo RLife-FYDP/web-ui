@@ -22,7 +22,7 @@ interface ResponseProps {
   rrule_option?: string;
   // we can use lastUpdated to filter the rrule dates out
   // via rrule.after(date) function
-  last_completed?: String;
+  last_completed?: string;
 }
 
 export class TaskViewState {
@@ -60,6 +60,7 @@ export class TaskViewState {
         ...task,
         startDate: new Date(task.start_time),
         assignee: task.users?.map((user) => user.id),
+        lastUpdated: new Date(task.last_completed ?? 0),
         rruleOptions: rrule,
       };
     }
@@ -68,6 +69,7 @@ export class TaskViewState {
       ...task,
       startDate: new Date(task.start_time),
       assignee: task.users?.map((user) => user.id),
+      lastUpdated: new Date(task.last_completed ?? 0),
       rruleOptions: undefined,
     };
   };

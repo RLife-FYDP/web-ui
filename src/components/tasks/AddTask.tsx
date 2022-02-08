@@ -36,7 +36,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
   constructor(props: AddTaskProps) {
     super(props);
     this.state = {
-      isRepeatableEvent: false,
+      isRepeatableEvent: !!this.props.taskToEdit?.rruleOptions,
     };
   }
 
