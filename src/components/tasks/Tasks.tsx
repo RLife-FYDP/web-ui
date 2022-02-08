@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { Loading } from "../common/Loading";
 import { AddTask } from "./AddTask";
 import { AddTaskButton } from "./AddTaskButton";
+import { AddTaskViewState } from "./AddTaskViewState";
 import { SingleTask } from "./SingleTask";
 import { TaskViewState } from "./TaskViewState";
 
@@ -16,6 +17,7 @@ interface TasksState {
 @observer
 export class Tasks extends React.Component<{}, TasksState> {
   @observable private viewState = new TaskViewState();
+  @observable private addTaskViewState = new AddTaskViewState();
 
   constructor(props: {}) {
     super(props);
@@ -43,7 +45,7 @@ export class Tasks extends React.Component<{}, TasksState> {
             const header =
               data.taskSection < today
                 ? "Overdue"
-                : data.taskSection.toString();
+                : data.taskSection.toLocaleDateString();
             return (
               <SectionContainer key={index}>
                 <SectionTitle>{header}</SectionTitle>
@@ -54,7 +56,7 @@ export class Tasks extends React.Component<{}, TasksState> {
                       id={details.id}
                       title={details.title}
                       rruleOptions={details.rruleOptions}
-                      assignee={details.assignee}
+                      assigneeNames={details.assignee?.map(id => this.addTaskViewState.getNameById(id, false) ?? '')}
                       onClick={this.handleViewTask}
                     />
                   );
