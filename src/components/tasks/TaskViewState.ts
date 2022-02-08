@@ -5,6 +5,7 @@ import { action, computed, makeAutoObservable, observable } from "mobx";
 import { NumberLiteralType } from "typescript";
 import { authenticatedGetRequest, getUser } from "../../api/apiClient";
 import { DefaultOptions, SingleTaskProps } from "./AddTaskViewState";
+import axios from "axios";
 
 export interface TaskProps {
   taskSection: Date;
@@ -16,7 +17,7 @@ interface ResponseProps {
   title: string;
   description?: string;
   tags?: string;
-  assignee?: number[];
+  users?: {id: number}[];
   start_time: string;
   rrule_option?: string;
   // we can use lastUpdated to filter the rrule dates out
@@ -95,14 +96,14 @@ export class TaskViewState {
     this.tasks = taskDateKeys.map((key) => {
       const values = processedTasksByDate[key];
       return {
-        taskSection: new Date(key),
+        taskSection: new Date(Number(key)),
         taskDetails: values.map((task) => {
           return {
             id: task.id,
             title: task.title,
             // TODO: will require rrule object
             // rruleOptions: task.rruleOptions,
-            assignee: task.assignee?.map((obj) => obj),
+            assignee: task.users?.map(({id}) => id),
           };
         }),
       };
