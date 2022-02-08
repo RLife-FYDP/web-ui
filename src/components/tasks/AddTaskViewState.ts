@@ -2,6 +2,7 @@ import axios from "axios";
 /* eslint-disable eqeqeq */
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import RRule, { Frequency, Options } from "rrule";
+import { AccessTokenStorageKey } from "../../commonUtils/consts";
 
 // This is necessary as the rrule dependency did not include undefined
 // as an option for option properties
@@ -149,7 +150,10 @@ export class AddTaskViewState {
     fetch("http://localhost:8080/tasks/create", {
       method: "POST",
       body,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${localStorage.getItem(AccessTokenStorageKey)}`,
+      },
     });
 
     // console.log("rrule string: ", rule.toString());

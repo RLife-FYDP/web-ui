@@ -47,6 +47,7 @@ export class TaskViewState {
       return undefined;
     }
 
+    // doing some formatting to match BE field props -> FE field props
     let rrule;
     if (task.rrule_option != undefined) {
       rrule = {
@@ -56,12 +57,14 @@ export class TaskViewState {
 
       return {
         ...task,
+        startDate: new Date(task.start_time),
         rruleOptions: rrule,
       };
     }
 
     return {
       ...task,
+      startDate: new Date(task.start_time),
       rruleOptions: undefined,
     };
   };
