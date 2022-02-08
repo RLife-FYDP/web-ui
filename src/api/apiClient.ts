@@ -54,6 +54,35 @@ export const authenticatedGetRequest = async (url: string) => {
   }
 };
 
+export const authenticatedRequestWithBody = async (url: string, body: string, method: string = 'POST') => {
+  let accessToken = localStorage.getItem(AccessTokenStorageKey);
+  const refreshToken = localStorage.getItem(RefreshTokenStorageKey);
+  if (!refreshToken) {
+    window.location.href = SignupPageUrl;
+    return;
+  }
+  const res = await fetch(BASE_URL + url, {
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body,
+    method,
+  });
+  if (res.status === 401) {
+    // refresh token
+    const newAccessToken = await refreshAccessToken(refreshToken);
+    if (!newAccessToken) {
+      throw new Error("unable to refresh token");
+    }
+    accessToken = newAccessToken;
+    return fetch(BASE_URL + url, {
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body,
+      method,
+    });
+  } else {
+    return res;
+  }
+}
+
 export const getUser = async () => {
   const accessToken = localStorage.getItem(AccessTokenStorageKey);
   if (!accessToken) {

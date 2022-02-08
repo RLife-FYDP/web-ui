@@ -8,13 +8,14 @@ import { ReactComponent as RepeatIcon } from "../../icons/RepeatIcon.svg";
 
 interface SingleTaskViewProps {
   id: number;
+  assigneeNames?: string[]
   onClick: (id: number) => void;
 }
 
 export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
   id,
   title: taskName,
-  assignee,
+  assigneeNames,
   rruleOptions,
   onClick,
 }) => {
@@ -28,7 +29,7 @@ export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
         />
         <TextContainer>
           <Title>{taskName}</Title>
-          <Assignee>Assigned to {assignee}</Assignee>
+          <Assignee>Assigned to {assigneeNames?.join(', ')}</Assignee>
         </TextContainer>
       </InformationContainer>
       {rruleOptions ? <StyledRepeatIcon /> : null}
