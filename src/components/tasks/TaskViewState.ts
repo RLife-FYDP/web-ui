@@ -17,7 +17,7 @@ interface ResponseProps {
   title: string;
   description?: string;
   tags?: string;
-  users?: {id: number}[];
+  users?: { id: number }[];
   start_time: string;
   rrule_option?: string;
   // we can use lastUpdated to filter the rrule dates out
@@ -59,6 +59,7 @@ export class TaskViewState {
       return {
         ...task,
         startDate: new Date(task.start_time),
+        assignee: task.users?.map((user) => user.id),
         rruleOptions: rrule,
       };
     }
@@ -66,6 +67,7 @@ export class TaskViewState {
     return {
       ...task,
       startDate: new Date(task.start_time),
+      assignee: task.users?.map((user) => user.id),
       rruleOptions: undefined,
     };
   };
@@ -103,7 +105,7 @@ export class TaskViewState {
             title: task.title,
             // TODO: will require rrule object
             // rruleOptions: task.rruleOptions,
-            assignee: task.users?.map(({id}) => id),
+            assignee: task.users?.map(({ id }) => id),
           };
         }),
       };
