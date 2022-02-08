@@ -2,6 +2,7 @@ import axios from "axios";
 /* eslint-disable eqeqeq */
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import RRule, { Frequency, Options } from "rrule";
+import { authenticatedRequestWithBody, getUser } from "../../api/apiClient";
 
 // This is necessary as the rrule dependency did not include undefined
 // as an option for option properties
@@ -83,8 +84,8 @@ export class AddTaskViewState {
   }
 
   async init() {
-    // TODO: fix hardcode of roomid = 4
-    const response = await axios.get("http://localhost:8080/suites/4/users");
+    const user = await getUser();
+    const response = await axios.get(`http://localhost:8080/suites/${user.suiteId}/users`);
     this.roommateData = response.data;
   }
 
@@ -146,11 +147,8 @@ export class AddTaskViewState {
       rruleOption: rruleString,
     });
 
-    fetch("http://localhost:8080/tasks/create", {
-      method: "POST",
-      body,
-      headers: { "Content-Type": "application/json" },
-    });
+
+    authenticatedRequestWithBody("/tasks/create", body);
 
     // console.log("rrule string: ", rule.toString());
     // console.log("rrule description: ", rule.toText());
