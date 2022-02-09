@@ -27,10 +27,13 @@ export class Tasks extends React.Component<{}, TasksState> {
   }
 
   handleViewTask = (id: number) => {
-    console.log(`Selected ${id} to edit`);
     this.setState({
       isEditState: id,
     });
+  };
+
+  handleTaskComplete = (id: number) => {
+    this.viewState.updateTaskCheckpoint(id);
   };
 
   render() {
@@ -64,6 +67,7 @@ export class Tasks extends React.Component<{}, TasksState> {
                           this.addTaskViewState.getNameById(id, false) ?? ""
                       )}
                       onClick={this.handleViewTask}
+                      onClickComplete={this.handleTaskComplete}
                     />
                   );
                 })}

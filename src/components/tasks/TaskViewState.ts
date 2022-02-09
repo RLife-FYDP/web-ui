@@ -3,8 +3,16 @@ import { rrulestr, Weekday } from "rrule";
 import { ByWeekday, RRule } from "rrule";
 import _ from "lodash";
 import { action, computed, makeAutoObservable, observable } from "mobx";
-import { authenticatedGetRequest, getUser } from "../../api/apiClient";
-import { DefaultOptions, SingleTaskProps } from "./AddTaskViewState";
+import {
+  authenticatedGetRequest,
+  authenticatedRequestWithBody,
+  getUser,
+} from "../../api/apiClient";
+import {
+  convertToUTC,
+  DefaultOptions,
+  SingleTaskProps,
+} from "./AddTaskViewState";
 
 export interface TaskProps {
   taskSection: Date;
@@ -41,6 +49,31 @@ export class TaskViewState {
     this.parseResponse();
   }
 
+  async updateTaskCheckpoint(id: number) {
+    let task = this.getTaskDetailsById(id)!;
+    task.lastUpdated = task.rruleOptions
+      ? new Date()
+      : new Date(8640000000000000);
+
+    const rule = new RRule(task.rruleOptions);
+    const rruleString = rule.toString();
+    const body = JSON.stringify({
+      title: task.title,
+      description: task.description,
+      // TODO: temp tags
+      tags: "2",
+      points: 2,
+      assignee: task.assignee,
+      startTime: convertToUTC(task.startDate),
+      rruleOption: rruleString,
+      lastCompleted: convertToUTC(task.lastUpdated),
+    });
+
+    await authenticatedRequestWithBody(`/tasks/${task.id}`, body, "PUT");
+
+    this.init();
+  }
+
   getTaskDetailsById = (id: number): SingleTaskProps | undefined => {
     let task = this.responseData?.find((task) => task?.id === id);
     if (task == undefined) {
@@ -59,12 +92,14 @@ export class TaskViewState {
         ...task,
         startDate: new Date(task.start_time),
         assignee: task.users?.map((user) => user.id),
-        lastUpdated: new Date(task.last_completed ?? 0),
+        lastUpdated: new Date(task.last_completed),
         rruleOptions: {
           ...rrule,
-          byweekday: (rrule.byweekday as ByWeekday[]).map(
-            (obj) => (obj as Weekday).weekday
-          ),
+          byweekday: Array.isArray(rrule.byweekday)
+            ? (rrule.byweekday as ByWeekday[]).map(
+                (obj) => (obj as Weekday).weekday
+              )
+            : rrule.byweekday,
         },
       };
     }
@@ -73,7 +108,7 @@ export class TaskViewState {
       ...task,
       startDate: new Date(task.start_time),
       assignee: task.users?.map((user) => user.id),
-      lastUpdated: new Date(task.last_completed ?? 0),
+      lastUpdated: new Date(task.last_completed),
       rruleOptions: undefined,
     };
   };
@@ -84,7 +119,16 @@ export class TaskViewState {
       return;
     }
 
-    const taskSortedByDate = this.responseData.sort((taskA, taskB) => {
+    const filteredData = this.responseData.filter((task) => {
+      if (task.rrule_option) {
+        let rrule = rrulestr(task.rrule_option);
+        return !!rrule.after(new Date(task.last_completed));
+      }
+
+      return new Date(task.last_completed) < new Date(task.start_time);
+    });
+
+    const taskSortedByDate = filteredData.sort((taskA, taskB) => {
       let dateA = new Date(taskA.start_time);
       let dateB = new Date(taskB.start_time);
 
@@ -138,6 +182,8 @@ export class TaskViewState {
         }),
       };
     });
+
+    console.log(this.tasks.length, taskDateKeys.length);
   }
 
   @computed

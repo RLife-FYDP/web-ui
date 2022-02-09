@@ -68,7 +68,7 @@ interface ResponseProps {
   id: number;
 }
 
-function convertToUTC(localeDate: Date): Date {
+export function convertToUTC(localeDate: Date): Date {
   let now_utc = Date.UTC(
     localeDate.getUTCFullYear(),
     localeDate.getUTCMonth(),
@@ -86,7 +86,7 @@ export class AddTaskViewState {
     title: "",
     assignee: [],
     startDate: new Date(),
-    lastUpdated: new Date(),
+    lastUpdated: new Date(0),
   };
 
   @observable private roommateData?: ResponseProps[];

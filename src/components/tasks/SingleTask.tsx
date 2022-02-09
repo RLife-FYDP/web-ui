@@ -10,6 +10,7 @@ interface SingleTaskViewProps {
   id: number;
   assigneeNames?: string[];
   onClick: (id: number) => void;
+  onClickComplete: (id: number) => void;
 }
 
 export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
@@ -18,6 +19,7 @@ export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
   assigneeNames,
   rruleOptions,
   onClick,
+  onClickComplete,
 }) => {
   let namesToShow =
     assigneeNames == undefined
@@ -27,14 +29,14 @@ export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
       : assigneeNames[0];
 
   return (
-    <Container onClick={() => onClick(id)}>
+    <Container>
       <InformationContainer>
         <Checkbox
           onClick={() => {
-            console.log("clicked");
+            onClickComplete(id);
           }}
         />
-        <TextContainer>
+        <TextContainer onClick={() => onClick(id)}>
           <Title>{title}</Title>
           <Assignee>Assigned to {namesToShow}</Assignee>
         </TextContainer>
@@ -67,6 +69,7 @@ const TextContainer = styled.div`
   flex-direction: column;
   justify-content: space-between;
   margin-left: 16px;
+  cursor: default;
 `;
 
 const Title = styled.p`
