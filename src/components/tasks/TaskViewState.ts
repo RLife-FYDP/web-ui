@@ -1,5 +1,6 @@
+import { Weekday } from "rrule";
 /* eslint-disable eqeqeq */
-import { RRule } from "rrule";
+import { ByWeekday, RRule } from "rrule";
 import _ from "lodash";
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import { NumberLiteralType } from "typescript";
@@ -61,7 +62,12 @@ export class TaskViewState {
         startDate: new Date(task.start_time),
         assignee: task.users?.map((user) => user.id),
         lastUpdated: new Date(task.last_completed ?? 0),
-        rruleOptions: rrule,
+        rruleOptions: {
+          ...rrule,
+          byweekday: (rrule.byweekday as ByWeekday[]).map(
+            (obj) => (obj as Weekday).weekday
+          ),
+        },
       };
     }
 

@@ -3,6 +3,7 @@ import axios from "axios";
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import RRule, { Frequency, Options } from "rrule";
 import { authenticatedRequestWithBody, getUser } from "../../api/apiClient";
+import { TaskPageUrl } from "../../commonUtils/consts";
 
 // This is necessary as the rrule dependency did not include undefined
 // as an option for option properties
@@ -73,6 +74,7 @@ export class AddTaskViewState {
   };
 
   @observable private roommateData?: ResponseProps[];
+  @observable isLoading: boolean = false;
 
   constructor(taskToEdit?: SingleTaskProps) {
     makeAutoObservable(this);
@@ -85,7 +87,9 @@ export class AddTaskViewState {
 
   async init() {
     const user = await getUser();
-    const response = await axios.get(`http://localhost:8080/suites/${user.suiteId}/users`);
+    const response = await axios.get(
+      `http://localhost:8080/suites/${user.suiteId}/users`
+    );
     this.roommateData = response.data;
   }
 
@@ -133,6 +137,10 @@ export class AddTaskViewState {
   };
 
   submitNewTask = () => {
+    this.submitTaskToServer();
+  };
+
+  private async submitTaskToServer() {
     const rule = new RRule(this.newTask.rruleOptions);
     const rruleString = rule.toString();
     const body = JSON.stringify({
@@ -147,11 +155,18 @@ export class AddTaskViewState {
       rruleOption: rruleString,
     });
 
+    this.isLoading = true;
+    if (this.newTask.id) {
+      await authenticatedRequestWithBody(`/tasks/${this.newTask.id}`, body);
+    } else {
+      await authenticatedRequestWithBody("/tasks/create", body);
+    }
+    this.isLoading = false;
 
-    authenticatedRequestWithBody("/tasks/create", body);
+    window.location.href = TaskPageUrl;
 
     // console.log("rrule string: ", rule.toString());
     // console.log("rrule description: ", rule.toText());
     // console.log("rrule reaccurrances:", rule.all());
-  };
+  }
 }

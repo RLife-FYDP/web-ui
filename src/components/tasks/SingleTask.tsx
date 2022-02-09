@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import React from "react";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
@@ -8,7 +9,7 @@ import { ReactComponent as RepeatIcon } from "../../icons/RepeatIcon.svg";
 
 interface SingleTaskViewProps {
   id: number;
-  assigneeNames?: string[]
+  assigneeNames?: string[];
   onClick: (id: number) => void;
 }
 
@@ -19,6 +20,13 @@ export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
   rruleOptions,
   onClick,
 }) => {
+  let namesToShow =
+    assigneeNames == undefined
+      ? ""
+      : assigneeNames.length > 1
+      ? assigneeNames[0] + ` and ${assigneeNames.length - 1} more`
+      : assigneeNames[0];
+
   return (
     <Container onClick={() => onClick(id)}>
       <InformationContainer>
@@ -29,7 +37,7 @@ export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
         />
         <TextContainer>
           <Title>{taskName}</Title>
-          <Assignee>Assigned to {assigneeNames?.join(', ')}</Assignee>
+          <Assignee>Assigned to {namesToShow}</Assignee>
         </TextContainer>
       </InformationContainer>
       {rruleOptions ? <StyledRepeatIcon /> : null}

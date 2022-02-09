@@ -72,7 +72,7 @@ export class Tasks extends React.Component<{}, TasksState> {
             dismiss={() => this.setState({ isEditState: undefined })}
           />
         )}
-        {tasks == undefined ? null : <StyledAddTaskButton />}
+        {tasks == undefined || this.state.isEditState ? null : <StyledAddTaskButton />}
       </Container>
     );
   }

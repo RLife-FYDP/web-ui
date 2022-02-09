@@ -75,7 +75,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
     const { newTask } = this.viewState;
     return (
       <Container>
-        {this.viewState.roommates ? (
+        {this.viewState.roommates || !this.viewState.isLoading ? (
           <>
             {" "}
             <HeaderContainer>
@@ -83,9 +83,9 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
                 Cancel
               </StyledLink>
               <Header>New Task</Header>
-              <StyledLink to="/tasks" onClick={this.viewState.submitNewTask}>
+              <StyledText onClick={this.viewState.submitNewTask}>
                 {this.props.taskToEdit ? "Save" : "Add"}
-              </StyledLink>
+              </StyledText>
             </HeaderContainer>
             <FormContainer>
               <ToggleButtonGroup
@@ -328,6 +328,10 @@ const Header = styled.p`
 const StyledLink = styled(NavLink)`
   color: ${COLORS.NavyBlue};
   text-decoration: none;
+`;
+
+const StyledText = styled.p`
+  color: ${COLORS.NavyBlue};
 `;
 
 const Input = styled.input`
