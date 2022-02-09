@@ -157,7 +157,11 @@ export class AddTaskViewState {
 
     this.isLoading = true;
     if (this.newTask.id) {
-      await authenticatedRequestWithBody(`/tasks/${this.newTask.id}`, body);
+      await authenticatedRequestWithBody(
+        `/tasks/${this.newTask.id}`,
+        body,
+        "PUT"
+      );
     } else {
       await authenticatedRequestWithBody("/tasks/create", body);
     }
