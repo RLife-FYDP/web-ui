@@ -75,7 +75,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
     const { newTask } = this.viewState;
     return (
       <Container>
-        {this.viewState.roommates || !this.viewState.isLoading ? (
+        {this.viewState.roommates && !this.viewState.isLoading ? (
           <>
             {" "}
             <HeaderContainer>
@@ -332,6 +332,7 @@ const StyledLink = styled(NavLink)`
 
 const StyledText = styled.p`
   color: ${COLORS.NavyBlue};
+  cursor: default;
 `;
 
 const Input = styled.input`

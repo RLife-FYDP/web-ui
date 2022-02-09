@@ -53,13 +53,13 @@ export interface SingleTaskProps {
   title: string;
   description?: string;
   tags?: string;
-  assignee?: number[];
+  assignee: number[];
   // start date should be mandatory
-  startDate?: Date;
+  startDate: Date;
   rruleOptions?: Options;
   // we can use lastUpdated to filter the rrule dates out
   // via rrule.after(date) function
-  lastUpdated?: Date;
+  lastUpdated: Date;
 }
 
 interface ResponseProps {
@@ -68,9 +68,25 @@ interface ResponseProps {
   id: number;
 }
 
+function convertToUTC(localeDate: Date): Date {
+  let now_utc = Date.UTC(
+    localeDate.getUTCFullYear(),
+    localeDate.getUTCMonth(),
+    localeDate.getUTCDate(),
+    localeDate.getUTCHours(),
+    localeDate.getUTCMinutes(),
+    localeDate.getUTCSeconds()
+  );
+
+  return new Date(now_utc);
+}
+
 export class AddTaskViewState {
   @observable newTask: SingleTaskProps = {
     title: "",
+    assignee: [],
+    startDate: new Date(),
+    lastUpdated: new Date(),
   };
 
   @observable private roommateData?: ResponseProps[];
@@ -80,9 +96,7 @@ export class AddTaskViewState {
     makeAutoObservable(this);
     this.init();
 
-    this.newTask = taskToEdit ?? {
-      title: "",
-    };
+    this.newTask = taskToEdit ?? this.newTask;
   }
 
   async init() {
@@ -148,11 +162,11 @@ export class AddTaskViewState {
       description: this.newTask.description,
       // TODO: temp tags
       tags: "2",
-      assignee: this.newTask.assignee,
-      startTime: this.newTask.startDate,
       points: 2,
-      lastCompleted: this.newTask.lastUpdated,
+      assignee: this.newTask.assignee,
+      startTime: convertToUTC(this.newTask.startDate),
       rruleOption: rruleString,
+      lastCompleted: convertToUTC(this.newTask.lastUpdated),
     });
 
     this.isLoading = true;

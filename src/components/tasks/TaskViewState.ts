@@ -1,16 +1,14 @@
-import { Weekday } from "rrule";
+import { rrulestr, Weekday } from "rrule";
 /* eslint-disable eqeqeq */
 import { ByWeekday, RRule } from "rrule";
 import _ from "lodash";
 import { action, computed, makeAutoObservable, observable } from "mobx";
-import { NumberLiteralType } from "typescript";
 import { authenticatedGetRequest, getUser } from "../../api/apiClient";
 import { DefaultOptions, SingleTaskProps } from "./AddTaskViewState";
-import axios from "axios";
 
 export interface TaskProps {
   taskSection: Date;
-  taskDetails: (SingleTaskProps & { id: number })[];
+  taskDetails: SingleTaskProps[];
 }
 
 interface ResponseProps {
@@ -18,12 +16,12 @@ interface ResponseProps {
   title: string;
   description?: string;
   tags?: string;
-  users?: { id: number }[];
+  users: { id: number }[];
   start_time: string;
   rrule_option?: string;
   // we can use lastUpdated to filter the rrule dates out
   // via rrule.after(date) function
-  last_completed?: string;
+  last_completed: string;
 }
 
 export class TaskViewState {
@@ -87,16 +85,37 @@ export class TaskViewState {
     }
 
     const taskSortedByDate = this.responseData.sort((taskA, taskB) => {
-      const dateA = new Date(taskA.start_time);
-      const dateB = new Date(taskB.start_time);
+      let dateA = new Date(taskA.start_time);
+      let dateB = new Date(taskB.start_time);
+
+      if (taskA.rrule_option) {
+        let rrule = rrulestr(taskA.rrule_option);
+        let firstOccurence = rrule.after(new Date(taskA.last_completed));
+        dateA = firstOccurence;
+      }
+
+      if (taskB.rrule_option) {
+        let rrule = rrulestr(taskB.rrule_option);
+        let firstOccurence = rrule.after(new Date(taskB.last_completed));
+        dateA = firstOccurence;
+      }
+
       return dateA.getTime() - dateB.getTime();
     });
 
     const processedTasksByDate = _.groupBy(taskSortedByDate, (task) => {
       const dateObject = new Date(task.start_time);
-      const startOfDay = dateObject.setHours(0, 0, 0, 0);
       const today = new Date().setHours(0, 0, 0, 0);
       const history = new Date(0).valueOf();
+      let startOfDay = dateObject.setHours(0, 0, 0, 0);
+
+      if (task.rrule_option) {
+        let rrule = rrulestr(task.rrule_option);
+        startOfDay = rrule
+          .after(new Date(task.last_completed))
+          .setHours(0, 0, 0, 0);
+      }
+
       // grouping everything that is overdue into "yesterday"
       return startOfDay < today ? history : startOfDay;
     });
@@ -111,10 +130,11 @@ export class TaskViewState {
           return {
             id: task.id,
             title: task.title,
-            // TODO: will require rrule object
-            // rruleOptions: task.rruleOptions,
-            assignee: task.users?.map(({ id }) => id),
-          };
+            rruleOptions: task.rrule_option,
+            startDate: new Date(task.start_time),
+            assignee: task.users.map(({ id }) => id),
+            lastUpdated: new Date(task.last_completed),
+          } as SingleTaskProps;
         }),
       };
     });

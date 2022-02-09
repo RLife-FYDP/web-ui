@@ -52,11 +52,17 @@ export class Tasks extends React.Component<{}, TasksState> {
                 {data.taskDetails.map((details) => {
                   return (
                     <SingleTask
-                      key={details.id}
-                      id={details.id}
+                      key={details.id!}
+                      id={details.id!}
                       title={details.title}
                       rruleOptions={details.rruleOptions}
-                      assigneeNames={details.assignee?.map(id => this.addTaskViewState.getNameById(id, false) ?? '')}
+                      startDate={details.startDate}
+                      lastUpdated={details.lastUpdated}
+                      assignee={details.assignee}
+                      assigneeNames={details.assignee.map(
+                        (id) =>
+                          this.addTaskViewState.getNameById(id, false) ?? ""
+                      )}
                       onClick={this.handleViewTask}
                     />
                   );
@@ -72,7 +78,9 @@ export class Tasks extends React.Component<{}, TasksState> {
             dismiss={() => this.setState({ isEditState: undefined })}
           />
         )}
-        {tasks == undefined || this.state.isEditState ? null : <StyledAddTaskButton />}
+        {tasks == undefined || this.state.isEditState ? null : (
+          <StyledAddTaskButton />
+        )}
       </Container>
     );
   }

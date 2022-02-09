@@ -1,4 +1,3 @@
-/* eslint-disable eqeqeq */
 import React from "react";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
@@ -15,7 +14,7 @@ interface SingleTaskViewProps {
 
 export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
   id,
-  title: taskName,
+  title,
   assigneeNames,
   rruleOptions,
   onClick,
@@ -36,7 +35,7 @@ export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
           }}
         />
         <TextContainer>
-          <Title>{taskName}</Title>
+          <Title>{title}</Title>
           <Assignee>Assigned to {namesToShow}</Assignee>
         </TextContainer>
       </InformationContainer>
