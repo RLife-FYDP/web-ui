@@ -4,6 +4,7 @@ import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
+import { Loading } from "../common/Loading";
 import { AddExpenseViewState } from "./AddExpenseViewState";
 
 @observer
@@ -25,7 +26,9 @@ export class AddExpense extends Component {
   render() {
     const splits = this.viewState.newExpense.splits;
 
-    return (
+    return this.viewState.isLoading || !this.viewState.roommates ? (
+      <Loading />
+    ) : (
       <Container>
         <HeaderContainer>
           <StyledLink to="/expenses">Cancel</StyledLink>

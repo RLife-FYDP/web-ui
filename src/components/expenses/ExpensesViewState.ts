@@ -20,9 +20,21 @@ export interface SingleExpenseProps {
   amount: String;
 }
 
+interface ExpenseResponseProps {
+
+}
+
 export class ExpensesViewState {
+  // @observable private responseData?: 
+
   constructor() {
     makeAutoObservable(this);
+
+    this.init();
+  }
+
+  async init() {
+
   }
 
   @computed

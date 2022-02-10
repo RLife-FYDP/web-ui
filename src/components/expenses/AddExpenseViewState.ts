@@ -1,3 +1,5 @@
+import { authenticatedRequestWithBody } from "./../../api/apiClient";
+import axios from "axios";
 import {
   action,
   computed,
@@ -5,7 +7,8 @@ import {
   observable,
   reaction,
 } from "mobx";
-import COLORS from "../../commonUtils/colors";
+import { getUser } from "../../api/apiClient";
+import { ExpensePageUrl } from "../../commonUtils/consts";
 
 interface SplitByAmount {
   // id of the roommate to be assigned to
@@ -27,6 +30,22 @@ interface RoommateProps {
   color: string;
 }
 
+interface RoommateProps {
+  first_name: string;
+  last_name: string;
+  id: number;
+}
+
+interface AddExpenseAPIProps {
+  totalAmount: number;
+  paidById: number;
+  receiptImgLink?: string;
+  userOwe: {
+    id: number;
+    amount: number;
+  }[];
+}
+
 export class AddExpenseViewState {
   @observable newExpense: NewExpenseProps = {
     expenseName: "",
@@ -36,14 +55,15 @@ export class AddExpenseViewState {
 
   @observable isSplitsTotalEqualToTotalAmount: boolean = true;
 
+  @observable private roommateData?: RoommateProps[];
+  @observable isLoading: boolean = false;
+
+  private myUserId?: number;
+
   constructor() {
     makeAutoObservable(this);
 
-    this.newExpense.splits = this.roommates.map((roommate) => ({
-      id: roommate.id,
-      amount: 0,
-      color: roommate.color,
-    }));
+    this.init();
 
     reaction(
       () => this.newExpense.amount,
@@ -62,11 +82,12 @@ export class AddExpenseViewState {
           );
 
         if (isPreviouslySplitEqual) {
-          this.newExpense.splits = this.roommates.map((roommate, _, arr) => ({
-            id: roommate.id,
-            amount: Math.round((newValue / arr.length) * 100) / 100,
-            color: roommate.color,
-          }));
+          this.newExpense.splits =
+            this.roommates?.map((roommate, _, arr) => ({
+              id: roommate.id,
+              amount: Math.round((newValue / arr.length) * 100) / 100,
+              color: roommate.color,
+            })) ?? [];
         } else {
           this.isSplitsTotalEqualToTotalAmount = false;
         }
@@ -74,14 +95,25 @@ export class AddExpenseViewState {
     );
   }
 
+  async init() {
+    const user = await getUser();
+    const response = await axios.get(
+      `http://localhost:8080/suites/${user.suiteId}/users`
+    );
+    this.roommateData = response.data;
+    this.myUserId = user.id;
+
+    this.newExpense.splits =
+      this.roommates?.map((roommate) => ({
+        id: roommate.id,
+        amount: 0,
+        color: roommate.color,
+      })) ?? [];
+  }
+
   @computed
-  get roommates(): RoommateProps[] {
-    return [
-      { id: 1, color: COLORS.Yellow },
-      { id: 2, color: COLORS.NavyBlue },
-      { id: 3, color: COLORS.SkyBlue },
-      { id: 4, color: COLORS.Teal },
-    ];
+  get roommates(): RoommateProps[] | undefined {
+    return this.roommateData;
   }
 
   @action
@@ -108,10 +140,30 @@ export class AddExpenseViewState {
   };
 
   submitNewExpense = () => {
+    this.submitNewExpenseToServer();
+  };
+
+  private async submitNewExpenseToServer() {
     if (!this.isSplitsTotalEqualToTotalAmount) {
-      alert(
+      return alert(
         "Sum of amounts not matching, which amount would you like to default to? (option of splits or total input)"
       );
     }
-  };
+
+    const body: AddExpenseAPIProps = {
+      totalAmount: this.newExpense.amount,
+      paidById: this.myUserId!,
+      receiptImgLink: "",
+      userOwe: this.newExpense.splits,
+    };
+
+    this.isLoading = true;
+    await authenticatedRequestWithBody(
+      "/expenses/create",
+      JSON.stringify(body)
+    );
+    this.isLoading = false;
+
+    window.location.href = ExpensePageUrl;
+  }
 }
