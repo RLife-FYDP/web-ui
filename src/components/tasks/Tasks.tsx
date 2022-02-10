@@ -36,6 +36,10 @@ export class Tasks extends React.Component<{}, TasksState> {
     this.viewState.updateTaskCheckpoint(id);
   };
 
+  handleTaskDelete = (id: number) => {
+    this.viewState.updateTaskCheckpoint(id, true);
+  }
+
   render() {
     const tasks = this.viewState.assignedTasks;
     const today = new Date();

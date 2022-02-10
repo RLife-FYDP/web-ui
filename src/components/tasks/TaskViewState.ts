@@ -41,6 +41,12 @@ export class TaskViewState {
     this.init();
   }
 
+  reloadData() {
+    this.responseData = undefined;
+    this.tasks = undefined;
+    this.init();
+  }
+
   async init() {
     const user = await getUser();
     const res = await authenticatedGetRequest(`/suites/${user.suiteId}/tasks`);
@@ -49,11 +55,20 @@ export class TaskViewState {
     this.parseResponse();
   }
 
-  async updateTaskCheckpoint(id: number) {
+  async updateTaskCheckpoint(id: number, toDelete = false) {
     let task = this.getTaskDetailsById(id)!;
-    task.lastUpdated = task.rruleOptions
-      ? new Date()
-      : new Date(8640000000000000);
+    let today = new Date();
+    let canBeDeleted = task.rruleOptions
+      ? task.rruleOptions.until && task.rruleOptions.until < today
+      : true;
+    today.setHours(0, 0, 0, 0);
+    task.lastUpdated = today;
+
+    if (canBeDeleted || toDelete) {
+      // delete task now that we're done
+      await authenticatedRequestWithBody(`/tasks/${task.id}`, "", "DELETE");
+      return this.reloadData();
+    } 
 
     const rule = new RRule(task.rruleOptions);
     const rruleString = rule.toString();
@@ -64,14 +79,13 @@ export class TaskViewState {
       tags: "2",
       points: 2,
       assignee: task.assignee,
-      startTime: convertToUTC(task.startDate),
+      startTime: task.startDate,
       rruleOption: rruleString,
-      lastCompleted: convertToUTC(task.lastUpdated),
+      lastCompleted: task.lastUpdated,
     });
 
     await authenticatedRequestWithBody(`/tasks/${task.id}`, body, "PUT");
-
-    this.init();
+    this.reloadData();
   }
 
   getTaskDetailsById = (id: number): SingleTaskProps | undefined => {
@@ -82,7 +96,7 @@ export class TaskViewState {
 
     // doing some formatting to match BE field props -> FE field props
     let rrule;
-    if (task.rrule_option != undefined) {
+    if (task.rrule_option != undefined && task.rrule_option !== "") {
       rrule = {
         ...DefaultOptions,
         ...RRule.parseString(task.rrule_option),
@@ -115,12 +129,16 @@ export class TaskViewState {
 
   @action
   parseResponse() {
-    if (this.responseData === undefined || this.responseData?.length === 0) {
+    if (this.responseData === undefined) {
       return;
     }
 
+    if (this.responseData.length === 0) {
+      this.tasks = [];
+    }
+
     const filteredData = this.responseData.filter((task) => {
-      if (task.rrule_option) {
+      if (task.rrule_option && task.rrule_option !== "") {
         let rrule = rrulestr(task.rrule_option);
         return !!rrule.after(new Date(task.last_completed));
       }
@@ -128,32 +146,32 @@ export class TaskViewState {
       return new Date(task.last_completed) < new Date(task.start_time);
     });
 
-    const taskSortedByDate = filteredData.sort((taskA, taskB) => {
-      let dateA = new Date(taskA.start_time);
-      let dateB = new Date(taskB.start_time);
+    // const taskSortedByDate = filteredData.sort((taskA, taskB) => {
+    //   let dateA = new Date(taskA.start_time);
+    //   let dateB = new Date(taskB.start_time);
 
-      if (taskA.rrule_option) {
-        let rrule = rrulestr(taskA.rrule_option);
-        let firstOccurence = rrule.after(new Date(taskA.last_completed));
-        dateA = firstOccurence;
-      }
+    //   if (taskA.rrule_option) {
+    //     let rrule = rrulestr(taskA.rrule_option);
+    //     let firstOccurence = rrule.after(new Date(taskA.last_completed));
+    //     dateA = firstOccurence;
+    //   }
 
-      if (taskB.rrule_option) {
-        let rrule = rrulestr(taskB.rrule_option);
-        let firstOccurence = rrule.after(new Date(taskB.last_completed));
-        dateA = firstOccurence;
-      }
+    //   if (taskB.rrule_option) {
+    //     let rrule = rrulestr(taskB.rrule_option);
+    //     let firstOccurence = rrule.after(new Date(taskB.last_completed));
+    //     dateA = firstOccurence;
+    //   }
 
-      return dateA.getTime() - dateB.getTime();
-    });
+    //   return dateA.getTime() - dateB.getTime();
+    // });
 
-    const processedTasksByDate = _.groupBy(taskSortedByDate, (task) => {
+    const processedTasksByDate = _.groupBy(filteredData, (task) => {
       const dateObject = new Date(task.start_time);
       const today = new Date().setHours(0, 0, 0, 0);
       const history = new Date(0).valueOf();
       let startOfDay = dateObject.setHours(0, 0, 0, 0);
 
-      if (task.rrule_option) {
+      if (task.rrule_option && task.rrule_option !== "") {
         let rrule = rrulestr(task.rrule_option);
         startOfDay = rrule
           .after(new Date(task.last_completed))
@@ -166,24 +184,26 @@ export class TaskViewState {
 
     const taskDateKeys = Object.keys(processedTasksByDate);
 
-    this.tasks = taskDateKeys.map((key) => {
-      const values = processedTasksByDate[key];
-      return {
-        taskSection: new Date(Number(key)),
-        taskDetails: values.map((task) => {
-          return {
-            id: task.id,
-            title: task.title,
-            rruleOptions: task.rrule_option,
-            startDate: new Date(task.start_time),
-            assignee: task.users.map(({ id }) => id),
-            lastUpdated: new Date(task.last_completed),
-          } as SingleTaskProps;
-        }),
-      };
-    });
-
-    console.log(this.tasks.length, taskDateKeys.length);
+    this.tasks = taskDateKeys
+      .map((key) => {
+        const values = processedTasksByDate[key];
+        return {
+          taskSection: new Date(Number(key)),
+          taskDetails: values.map((task) => {
+            return {
+              id: task.id,
+              title: task.title,
+              rruleOptions: task.rrule_option,
+              startDate: new Date(task.start_time),
+              assignee: task.users.map(({ id }) => id),
+              lastUpdated: new Date(task.last_completed),
+            } as SingleTaskProps;
+          }),
+        };
+      })
+      .sort((sectionA, sectionB) => {
+        return sectionA.taskSection.getTime() - sectionB.taskSection.getTime();
+      });
   }
 
   @computed

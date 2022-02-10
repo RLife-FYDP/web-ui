@@ -284,9 +284,9 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
                 </>
               ) : null}
               {this.props.taskToEdit ? (
-                <StyledLink to="/tasks" onClick={() => console.log("delete")}>
+                <StyledText onClick={this.viewState.deleteTask}>
                   Delete
-                </StyledLink>
+                </StyledText>
               ) : null}
             </FormContainer>
           </>

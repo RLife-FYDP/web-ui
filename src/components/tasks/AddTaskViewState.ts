@@ -150,13 +150,29 @@ export class AddTaskViewState {
       : roommate?.first_name;
   };
 
+  deleteTask = () => {
+    this.deleteTaskToServer();
+  };
+
   submitNewTask = () => {
     this.submitTaskToServer();
   };
 
+  private async deleteTaskToServer() {
+    await authenticatedRequestWithBody(
+      `/tasks/${this.newTask.id}`,
+      "",
+      "DELETE"
+    );
+
+    window.location.reload();
+  }
+
   private async submitTaskToServer() {
     const rule = new RRule(this.newTask.rruleOptions);
     const rruleString = rule.toString();
+    this.newTask.startDate.setHours(0, 0, 0, 0);
+
     const body = JSON.stringify({
       title: this.newTask.title,
       description: this.newTask.description,
@@ -164,9 +180,9 @@ export class AddTaskViewState {
       tags: "2",
       points: 2,
       assignee: this.newTask.assignee,
-      startTime: convertToUTC(this.newTask.startDate),
+      startTime: this.newTask.startDate,
       rruleOption: rruleString,
-      lastCompleted: convertToUTC(this.newTask.lastUpdated),
+      lastCompleted: this.newTask.lastUpdated,
     });
 
     this.isLoading = true;
