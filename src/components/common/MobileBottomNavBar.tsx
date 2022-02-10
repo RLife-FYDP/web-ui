@@ -52,9 +52,7 @@ export class MobileBottomNavBar extends Component {
         <Route exact path="/expenses">
           {withAuthentication(Expenses)}
         </Route>
-        <Route exact path="/expenses/add">
-          {withAuthentication(AddExpense)}
-        </Route>
+        <Route path="/expenses/add">{withAuthentication(AddExpense)}</Route>
         <Route path="/canvas">{withAuthentication(Canvas)}</Route>
         <Route path="/signup">
           <Signup />

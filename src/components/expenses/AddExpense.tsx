@@ -17,7 +17,7 @@ export class AddExpense extends Component {
   };
 
   updateSplitAmountById = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const id = event.target.name;
+    const id = parseInt(event.target.name);
     const value = event.target.value.replace(/^0+/, "");
     this.viewState.setNewSplitAmountById(id, Number(value));
   };
@@ -72,7 +72,7 @@ export class AddExpense extends Component {
                   >
                     <UserAmountInput
                       key={index}
-                      name={split.id}
+                      name={split.id.toString()}
                       min={0}
                       placeholder="0"
                       type="number"

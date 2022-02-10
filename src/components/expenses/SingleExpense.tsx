@@ -3,6 +3,8 @@ import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { SingleExpenseProps } from "./ExpensesViewState";
 import { ReactComponent as GroceryIcon } from "../../icons/GroceryIcon.svg";
+import { NewExpenseProps } from "./AddExpenseViewState";
+import { ExpensePageUrl } from "../../commonUtils/consts";
 
 export const SingleExpense: React.FC<SingleExpenseProps> = ({
   date,
@@ -13,8 +15,22 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
 }) => {
   const month = date.toLocaleString("default", { month: "short" });
   const day = date.getDate();
+
+  const onClickExpense = () => {
+    let obj: NewExpenseProps = {
+      expenseName: "test",
+      amount: 4,
+      splits: [{ id: 1, amount: 2, color: COLORS.NavyBlue }],
+      receipt: "example.com",
+    };
+
+    window.location.href = encodeURI(
+      `${ExpensePageUrl}/add/${JSON.stringify(obj)}`
+    );
+  };
+
   return (
-    <TableRow>
+    <TableRow onClick={onClickExpense}>
       <TableCell>
         <CreatedDateContainer>
           <CreatedDate>

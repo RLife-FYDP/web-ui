@@ -9,12 +9,12 @@ import COLORS from "../../commonUtils/colors";
 
 interface SplitByAmount {
   // id of the roommate to be assigned to
-  id: string;
+  id: number;
   amount: number;
   color: string;
 }
 
-interface NewExpenseProps {
+export interface NewExpenseProps {
   expenseName: string;
   amount: number;
   splits: SplitByAmount[];
@@ -23,7 +23,7 @@ interface NewExpenseProps {
 }
 
 interface RoommateProps {
-  id: string;
+  id: number;
   color: string;
 }
 
@@ -77,10 +77,10 @@ export class AddExpenseViewState {
   @computed
   get roommates(): RoommateProps[] {
     return [
-      { id: "Justin", color: COLORS.Yellow },
-      { id: "Marcus", color: COLORS.NavyBlue },
-      { id: "Lincoln", color: COLORS.SkyBlue },
-      { id: "Austin", color: COLORS.Teal },
+      { id: 1, color: COLORS.Yellow },
+      { id: 2, color: COLORS.NavyBlue },
+      { id: 3, color: COLORS.SkyBlue },
+      { id: 4, color: COLORS.Teal },
     ];
   }
 
@@ -90,7 +90,7 @@ export class AddExpenseViewState {
   };
 
   @action
-  setNewSplitAmountById = (id: string, amount: number) => {
+  setNewSplitAmountById = (id: number, amount: number) => {
     const splits = this.newExpense.splits;
     const matchingSplit = splits.find((split) => split.id === id);
 

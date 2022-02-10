@@ -10,7 +10,6 @@ import { SingleExpense } from "./SingleExpense";
 @observer
 export class Expenses extends React.Component {
   @observable private viewState = new ExpensesViewState();
-
   render() {
     return (
       <Container>
