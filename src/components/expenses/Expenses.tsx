@@ -50,6 +50,7 @@ const Container = styled.div`
   margin: 8px;
   margin-top: 24px;
   max-height: 100%;
+  overflow-y: scroll;
 `;
 
 const HeaderContainer = styled.div`

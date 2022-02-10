@@ -44,7 +44,7 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
 
   return (
     <TableRow>
-      <TableCell width="10%">
+      <TableCell width="7%">
         <Checkbox onClick={onClickCompleteHandler} />
       </TableCell>
       <TableCell width="10%">
@@ -55,7 +55,7 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
           </CreatedDate>
         </CreatedDateContainer>
       </TableCell>
-      <TableCell width="40%" onClick={onClickExpense}>
+      <TableCell width="43%" onClick={onClickExpense}>
         <Category>
           {/* <GroceryIcon /> */}
           <CategoryText>{name}</CategoryText>
