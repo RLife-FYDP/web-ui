@@ -25,7 +25,7 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
     };
 
     window.location.href = encodeURI(
-      `${ExpensePageUrl}/add/${JSON.stringify(obj)}`
+      `${ExpensePageUrl}/add/?data=${JSON.stringify(obj)}`
     );
   };
 

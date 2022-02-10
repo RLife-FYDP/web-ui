@@ -18,6 +18,7 @@ interface SplitByAmount {
 }
 
 export interface NewExpenseProps {
+  id?: number;
   expenseName: string;
   amount: number;
   splits: SplitByAmount[];
@@ -26,14 +27,10 @@ export interface NewExpenseProps {
 }
 
 interface RoommateProps {
-  id: number;
-  color: string;
-}
-
-interface RoommateProps {
   first_name: string;
   last_name: string;
   id: number;
+  color: string;
 }
 
 interface AddExpenseAPIProps {
@@ -63,7 +60,6 @@ export class AddExpenseViewState {
 
   constructor() {
     makeAutoObservable(this);
-
     this.init();
 
     reaction(
@@ -110,6 +106,14 @@ export class AddExpenseViewState {
         amount: 0,
         color: roommate.color,
       })) ?? [];
+
+    const dataSplit = "?data=";
+    let url = window.location.href;
+    if (url.indexOf(dataSplit) !== -1) {
+      let splitUrl = url.split(dataSplit);
+      let data = JSON.parse(decodeURIComponent(splitUrl[splitUrl.length - 1]));
+      this.newExpense = data as NewExpenseProps;
+    }
   }
 
   getUserNameById = (id: number) => {
