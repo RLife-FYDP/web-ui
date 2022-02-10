@@ -38,11 +38,13 @@ export class Tasks extends React.Component<{}, TasksState> {
 
   handleTaskDelete = (id: number) => {
     this.viewState.updateTaskCheckpoint(id, true);
-  }
+  };
 
   render() {
     const tasks = this.viewState.assignedTasks;
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     return (
       <Container>
         {tasks == undefined ? (
@@ -64,7 +66,6 @@ export class Tasks extends React.Component<{}, TasksState> {
                       title={details.title}
                       rruleOptions={details.rruleOptions}
                       startDate={details.startDate}
-                      lastUpdated={details.lastUpdated}
                       assignee={details.assignee}
                       assigneeNames={details.assignee.map(
                         (id) =>

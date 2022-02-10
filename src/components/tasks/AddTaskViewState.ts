@@ -57,9 +57,6 @@ export interface SingleTaskProps {
   // start date should be mandatory
   startDate: Date;
   rruleOptions?: Options;
-  // we can use lastUpdated to filter the rrule dates out
-  // via rrule.after(date) function
-  lastUpdated: Date;
 }
 
 interface ResponseProps {
@@ -86,7 +83,6 @@ export class AddTaskViewState {
     title: "",
     assignee: [],
     startDate: new Date(),
-    lastUpdated: new Date(0),
   };
 
   @observable private roommateData?: ResponseProps[];
@@ -182,7 +178,6 @@ export class AddTaskViewState {
       assignee: this.newTask.assignee,
       startTime: this.newTask.startDate,
       rruleOption: rruleString,
-      lastCompleted: this.newTask.lastUpdated,
     });
 
     this.isLoading = true;

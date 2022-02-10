@@ -27,9 +27,6 @@ interface ResponseProps {
   users: { id: number }[];
   start_time: string;
   rrule_option?: string;
-  // we can use lastUpdated to filter the rrule dates out
-  // via rrule.after(date) function
-  last_completed: string;
 }
 
 export class TaskViewState {
@@ -58,19 +55,22 @@ export class TaskViewState {
   async updateTaskCheckpoint(id: number, toDelete = false) {
     let task = this.getTaskDetailsById(id)!;
     let today = new Date();
-    let canBeDeleted = task.rruleOptions
-      ? task.rruleOptions.until && task.rruleOptions.until < today
-      : true;
+    let rule = new RRule(task.rruleOptions);
+    let canBeDeleted = task.rruleOptions ? rule.all().length === 0 : true;
     today.setHours(0, 0, 0, 0);
-    task.lastUpdated = today;
 
-    if (canBeDeleted || toDelete) {
+    if (canBeDeleted || toDelete || !task.rruleOptions) {
       // delete task now that we're done
       await authenticatedRequestWithBody(`/tasks/${task.id}`, "", "DELETE");
       return this.reloadData();
-    } 
+    }
 
-    const rule = new RRule(task.rruleOptions);
+    let newStartDate = rule.all()[0];
+    newStartDate.setDate(rule.all()[0].getDate() + 1);
+
+    task.rruleOptions.dtstart = newStartDate;
+    rule = new RRule(task.rruleOptions);
+
     const rruleString = rule.toString();
     const body = JSON.stringify({
       title: task.title,
@@ -81,7 +81,7 @@ export class TaskViewState {
       assignee: task.assignee,
       startTime: task.startDate,
       rruleOption: rruleString,
-      lastCompleted: task.lastUpdated,
+      lastCompleted: new Date(),
     });
 
     await authenticatedRequestWithBody(`/tasks/${task.id}`, body, "PUT");
@@ -106,7 +106,6 @@ export class TaskViewState {
         ...task,
         startDate: new Date(task.start_time),
         assignee: task.users?.map((user) => user.id),
-        lastUpdated: new Date(task.last_completed),
         rruleOptions: {
           ...rrule,
           byweekday: Array.isArray(rrule.byweekday)
@@ -122,7 +121,6 @@ export class TaskViewState {
       ...task,
       startDate: new Date(task.start_time),
       assignee: task.users?.map((user) => user.id),
-      lastUpdated: new Date(task.last_completed),
       rruleOptions: undefined,
     };
   };
@@ -140,12 +138,13 @@ export class TaskViewState {
     const filteredData = this.responseData.filter((task) => {
       if (task.rrule_option && task.rrule_option !== "") {
         let rrule = rrulestr(task.rrule_option);
-        return !!rrule.after(new Date(task.last_completed));
+        return rrule.all().length !== 0;
       }
 
-      return new Date(task.last_completed) < new Date(task.start_time);
+      return new Date(task.start_time);
     });
 
+    // TODO: remove this if tests work after
     // const taskSortedByDate = filteredData.sort((taskA, taskB) => {
     //   let dateA = new Date(taskA.start_time);
     //   let dateB = new Date(taskB.start_time);
@@ -166,16 +165,16 @@ export class TaskViewState {
     // });
 
     const processedTasksByDate = _.groupBy(filteredData, (task) => {
-      const dateObject = new Date(task.start_time);
-      const today = new Date().setHours(0, 0, 0, 0);
       const history = new Date(0).valueOf();
+      const today = new Date().setHours(0, 0, 0, 0);
+      let dateObject = new Date(task.start_time);
+
       let startOfDay = dateObject.setHours(0, 0, 0, 0);
 
       if (task.rrule_option && task.rrule_option !== "") {
         let rrule = rrulestr(task.rrule_option);
-        startOfDay = rrule
-          .after(new Date(task.last_completed))
-          .setHours(0, 0, 0, 0);
+        // will always exist since we filtered it above
+        startOfDay = rrule.all()[0].setHours(0, 0, 0, 0);
       }
 
       // grouping everything that is overdue into "yesterday"
@@ -196,7 +195,6 @@ export class TaskViewState {
               rruleOptions: task.rrule_option,
               startDate: new Date(task.start_time),
               assignee: task.users.map(({ id }) => id),
-              lastUpdated: new Date(task.last_completed),
             } as SingleTaskProps;
           }),
         };
