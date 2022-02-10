@@ -15,8 +15,9 @@ export enum ExpenseState {
 }
 
 export interface SingleExpenseProps {
+  id?: number;
   date: Date;
-  category: string;
+  name: string;
   paidBy: string;
   state: ExpenseState;
   amount: number;
@@ -29,6 +30,7 @@ interface RoommateProps {
 }
 
 interface ExpenseResponseProps {
+  expense_item_id: number;
   amount_owe: number;
   expense_item_description: string;
   expense_item_paid_by_user_id: number;
@@ -65,13 +67,15 @@ export class ExpensesViewState {
     return this.responseData
       ?.map((data) => {
         return {
+          id: data.expense_item_id,
           date: new Date(data.paid_at),
-          category: data.expense_item_description,
+          name: data.expense_item_description,
           paidBy: this.getUserNameById(data.expense_item_paid_by_user_id)!,
           state: ExpenseState.OWED,
           amount: data.amount_owe,
         } as SingleExpenseProps;
       })
+      .filter((data) => !data.paidBy)
       .sort(
         (expenseA, expenseB) =>
           expenseA.date.valueOf() - expenseB.date.valueOf()

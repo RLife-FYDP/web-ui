@@ -30,8 +30,9 @@ export class Expenses extends React.Component {
           {this.viewState.expenseData?.map((data, index) => (
             <SingleExpense
               key={index}
+              id={data.id}
               date={data.date}
-              category={data.category}
+              name={data.name}
               paidBy={data.paidBy}
               state={data.state}
               amount={data.amount}

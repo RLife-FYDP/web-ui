@@ -5,10 +5,13 @@ import { SingleExpenseProps } from "./ExpensesViewState";
 import { ReactComponent as GroceryIcon } from "../../icons/GroceryIcon.svg";
 import { NewExpenseProps } from "./AddExpenseViewState";
 import { ExpensePageUrl } from "../../commonUtils/consts";
+import { Checkbox } from "../common/Checkbox";
+import { authenticatedRequestWithBody } from "../../api/apiClient";
 
 export const SingleExpense: React.FC<SingleExpenseProps> = ({
+  id,
   date,
-  category,
+  name,
   paidBy,
   state,
   amount,
@@ -18,8 +21,9 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
 
   const onClickExpense = () => {
     let obj: NewExpenseProps = {
-      expenseName: "test",
-      amount: 4,
+      id,
+      expenseName: name,
+      amount,
       splits: [{ id: 1, amount: 2, color: COLORS.NavyBlue }],
       receipt: "example.com",
     };
@@ -29,9 +33,21 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
     );
   };
 
+  const onClickCompleteHandler = () => {
+    onClickComplete();
+  };
+
+  async function onClickComplete() {
+    await authenticatedRequestWithBody(`/expenses/pay/${id}`, "", "PUT");
+    // window.location.href = ExpensePageUrl;
+  }
+
   return (
-    <TableRow onClick={onClickExpense}>
-      <TableCell width="20%">
+    <TableRow>
+      <TableCell width="10%">
+        <Checkbox onClick={onClickCompleteHandler} />
+      </TableCell>
+      <TableCell width="10%">
         <CreatedDateContainer>
           <CreatedDate>
             <Month>{month}</Month>
@@ -39,10 +55,10 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
           </CreatedDate>
         </CreatedDateContainer>
       </TableCell>
-      <TableCell width="40%">
+      <TableCell width="40%" onClick={onClickExpense}>
         <Category>
           {/* <GroceryIcon /> */}
-          <CategoryText>{category}</CategoryText>
+          <CategoryText>{name}</CategoryText>
         </Category>
       </TableCell>
       <TableCell width="20%">
