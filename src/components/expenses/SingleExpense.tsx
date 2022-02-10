@@ -31,7 +31,7 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
 
   return (
     <TableRow onClick={onClickExpense}>
-      <TableCell>
+      <TableCell width="20%">
         <CreatedDateContainer>
           <CreatedDate>
             <Month>{month}</Month>
@@ -39,19 +39,19 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
           </CreatedDate>
         </CreatedDateContainer>
       </TableCell>
-      <TableCell>
+      <TableCell width="40%">
         <Category>
-          <GroceryIcon />
-          {category}
+          {/* <GroceryIcon /> */}
+          <CategoryText>{category}</CategoryText>
         </Category>
       </TableCell>
-      <TableCell>
+      <TableCell width="20%">
         <Payee>
           <PaidBy>Paid By</PaidBy>
           <PaidByName>{paidBy}</PaidByName>
         </Payee>
       </TableCell>
-      <TableCell>
+      <TableCell width="20%">
         <StateContainer>
           <State>
             <StateHeader>{state}</StateHeader>
@@ -67,8 +67,9 @@ const TableRow = styled.tr`
   border-spacing: 0;
 `;
 
-const TableCell = styled.td`
+const TableCell = styled.td<{ width: string }>`
   padding-bottom: 16px;
+  width: ${({ width }) => width};
 `;
 
 const CreatedDateContainer = styled.div`
@@ -94,8 +95,15 @@ const Day = styled.p`
 const Category = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: left;
   align-items: center;
+  max-width: 100%;
+`;
+
+const CategoryText = styled.p`
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 
 const Payee = styled.div`

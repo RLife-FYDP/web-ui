@@ -1,4 +1,6 @@
-import { computed, makeAutoObservable } from "mobx";
+import axios from "axios";
+import { computed, makeAutoObservable, observable } from "mobx";
+import { authenticatedGetRequest, getUser } from "../../api/apiClient";
 
 export enum ExpenseCategory {
   GROCERY = "Groceries",
@@ -14,18 +16,31 @@ export enum ExpenseState {
 
 export interface SingleExpenseProps {
   date: Date;
-  category: ExpenseCategory;
-  paidBy: String;
+  category: string;
+  paidBy: string;
   state: ExpenseState;
-  amount: String;
+  amount: number;
+}
+
+interface RoommateProps {
+  first_name: string;
+  last_name: string;
+  id: number;
 }
 
 interface ExpenseResponseProps {
-
+  amount_owe: number;
+  expense_item_description: string;
+  expense_item_paid_by_user_id: number;
+  expense_item_total_amount: number;
+  expense_receipt_url?: string;
+  paid_at: string;
 }
 
 export class ExpensesViewState {
-  // @observable private responseData?: 
+  @observable private responseData?: ExpenseResponseProps[];
+  @observable private roommateData?: RoommateProps[];
+  @observable isLoading: boolean = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -34,33 +49,41 @@ export class ExpensesViewState {
   }
 
   async init() {
+    const resp = await authenticatedGetRequest("/users/expenses");
+    const data = await resp?.json();
 
+    const user = await getUser();
+    const response = await axios.get(
+      `http://localhost:8080/suites/${user.suiteId}/users`
+    );
+    this.roommateData = response.data;
+    this.responseData = data;
   }
 
   @computed
-  get testData(): SingleExpenseProps[] {
-    return [
-      {
-        date: new Date(),
-        category: ExpenseCategory.GROCERY,
-        paidBy: "Austin",
-        state: ExpenseState.OWED,
-        amount: "$40.12",
-      },
-      {
-        date: new Date(),
-        category: ExpenseCategory.GROCERY,
-        paidBy: "You",
-        state: ExpenseState.SETTLED,
-        amount: "",
-      },
-      {
-        date: new Date(),
-        category: ExpenseCategory.GROCERY,
-        paidBy: "Austin",
-        state: ExpenseState.PAID,
-        amount: "$40.12",
-      },
-    ];
+  get expenseData(): SingleExpenseProps[] | undefined {
+    return this.responseData
+      ?.map((data) => {
+        return {
+          date: new Date(data.paid_at),
+          category: data.expense_item_description,
+          paidBy: this.getUserNameById(data.expense_item_paid_by_user_id)!,
+          state: ExpenseState.OWED,
+          amount: data.amount_owe,
+        } as SingleExpenseProps;
+      })
+      .sort(
+        (expenseA, expenseB) =>
+          expenseA.date.valueOf() - expenseB.date.valueOf()
+      );
   }
+
+  @computed
+  get roommates(): RoommateProps[] | undefined {
+    return this.roommateData;
+  }
+
+  getUserNameById = (id: number) => {
+    return this.roommates?.find((roommate) => roommate.id === id)?.first_name;
+  };
 }

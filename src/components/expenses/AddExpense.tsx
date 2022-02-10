@@ -65,7 +65,9 @@ export class AddExpense extends Component {
             {splits.map((split, index) => {
               return (
                 <SplitContainer>
-                  <UserNameText>{split.id}: </UserNameText>
+                  <UserNameText>
+                    {this.viewState.getUserNameById(split.id)}:{" "}
+                  </UserNameText>
                   <AmountContainer
                     widthPercent={100}
                     progressPercent={

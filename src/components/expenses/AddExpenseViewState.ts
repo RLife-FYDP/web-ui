@@ -37,6 +37,7 @@ interface RoommateProps {
 }
 
 interface AddExpenseAPIProps {
+  description: string;
   totalAmount: number;
   paidById: number;
   receiptImgLink?: string;
@@ -111,6 +112,10 @@ export class AddExpenseViewState {
       })) ?? [];
   }
 
+  getUserNameById = (id: number) => {
+    return this.roommates?.find((roommate) => roommate.id === id)?.first_name;
+  };
+
   @computed
   get roommates(): RoommateProps[] | undefined {
     return this.roommateData;
@@ -151,7 +156,8 @@ export class AddExpenseViewState {
     }
 
     const body: AddExpenseAPIProps = {
-      totalAmount: this.newExpense.amount,
+      description: this.newExpense.expenseName,
+      totalAmount: parseInt(this.newExpense.amount.toString()),
       paidById: this.myUserId!,
       receiptImgLink: "",
       userOwe: this.newExpense.splits,

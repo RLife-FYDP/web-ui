@@ -4,6 +4,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
+import { Loading } from "../common/Loading";
 import { ExpensesViewState } from "./ExpensesViewState";
 import { SingleExpense } from "./SingleExpense";
 
@@ -11,7 +12,9 @@ import { SingleExpense } from "./SingleExpense";
 export class Expenses extends React.Component {
   @observable private viewState = new ExpensesViewState();
   render() {
-    return (
+    return this.viewState.isLoading || !this.viewState.roommates ? (
+      <Loading />
+    ) : (
       <Container>
         <HeaderContainer>
           <TitleContainer>
@@ -24,7 +27,7 @@ export class Expenses extends React.Component {
           <OrangeCaption>Simplified: You owe {"Austin"} $xx.xx</OrangeCaption>
         </SimplifiedCaptionContainer>
         <ExpenseContainer>
-          {this.viewState.testData.map((data, index) => (
+          {this.viewState.expenseData?.map((data, index) => (
             <SingleExpense
               key={index}
               date={data.date}
@@ -61,6 +64,8 @@ const TitleContainer = styled.div`
 `;
 
 const ExpenseContainer = styled.table`
+  table-layout: fixed;
+  width: 100%;
   margin: 16px 0;
 `;
 
