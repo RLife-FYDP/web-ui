@@ -1,5 +1,5 @@
 import axios from "axios";
-import { computed, makeAutoObservable, observable } from "mobx";
+import { action, computed, makeAutoObservable, observable } from "mobx";
 import { authenticatedGetRequest, getUser } from "../../api/apiClient";
 
 export enum ExpenseCategory {
@@ -8,18 +8,12 @@ export enum ExpenseCategory {
   BILL = "Bills",
 }
 
-export enum ExpenseState {
-  SETTLED = "Settled!",
-  OWED = "You owe",
-  PAID = "You paid",
-}
-
 export interface SingleExpenseProps {
   id?: number;
   date: Date;
   name: string;
   paidBy: string;
-  state: ExpenseState;
+  state: string | null | undefined;
   amount: number;
 }
 
@@ -51,6 +45,8 @@ export class ExpensesViewState {
   }
 
   async init() {
+    this.isLoading = true;
+
     const resp = await authenticatedGetRequest("/users/expenses");
     const data = await resp?.json();
 
@@ -60,7 +56,15 @@ export class ExpensesViewState {
     );
     this.roommateData = response.data;
     this.responseData = data;
+    this.isLoading = false;
   }
+
+  @action
+  reloadData = () => {
+    this.responseData = undefined;
+    this.roommateData = undefined;
+    this.init();
+  };
 
   @computed
   get expenseData(): SingleExpenseProps[] | undefined {
@@ -71,11 +75,11 @@ export class ExpensesViewState {
           date: new Date(data.paid_at),
           name: data.expense_item_description,
           paidBy: this.getUserNameById(data.expense_item_paid_by_user_id)!,
-          state: ExpenseState.OWED,
+          state: data.paid_at,
           amount: data.amount_owe,
         } as SingleExpenseProps;
       })
-      .filter((data) => !data.paidBy)
+      .filter((data) => !data.state)
       .sort(
         (expenseA, expenseB) =>
           expenseA.date.valueOf() - expenseB.date.valueOf()

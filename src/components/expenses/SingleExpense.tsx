@@ -2,20 +2,18 @@ import React from "react";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { SingleExpenseProps } from "./ExpensesViewState";
-import { ReactComponent as GroceryIcon } from "../../icons/GroceryIcon.svg";
 import { NewExpenseProps } from "./AddExpenseViewState";
 import { ExpensePageUrl } from "../../commonUtils/consts";
 import { Checkbox } from "../common/Checkbox";
 import { authenticatedRequestWithBody } from "../../api/apiClient";
 
-export const SingleExpense: React.FC<SingleExpenseProps> = ({
-  id,
-  date,
-  name,
-  paidBy,
-  state,
-  amount,
-}) => {
+interface SingleExpenseViewProps {
+  onClick: () => void;
+}
+
+export const SingleExpense: React.FC<
+  SingleExpenseProps & SingleExpenseViewProps
+> = ({ id, date, name, paidBy, state, amount, onClick }) => {
   const month = date.toLocaleString("default", { month: "short" });
   const day = date.getDate();
 
@@ -39,7 +37,7 @@ export const SingleExpense: React.FC<SingleExpenseProps> = ({
 
   async function onClickComplete() {
     await authenticatedRequestWithBody(`/expenses/pay/${id}`, "", "PUT");
-    // window.location.href = ExpensePageUrl;
+    onClick();
   }
 
   return (

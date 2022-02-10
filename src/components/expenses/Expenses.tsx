@@ -36,6 +36,7 @@ export class Expenses extends React.Component {
               paidBy={data.paidBy}
               state={data.state}
               amount={data.amount}
+              onClick={this.viewState.reloadData}
             ></SingleExpense>
           ))}
         </ExpenseContainer>
