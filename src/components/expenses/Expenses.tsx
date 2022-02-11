@@ -19,13 +19,13 @@ export class Expenses extends React.Component {
         <HeaderContainer>
           <TitleContainer>
             <Title>All Expenses</Title>
-            <Caption>You lent out $xx.xx</Caption>
+            {/* <Caption>You lent out $xx.xx</Caption> */}
           </TitleContainer>
           <AddExpenseButton to="/expenses/add">Add Expense</AddExpenseButton>
         </HeaderContainer>
-        <SimplifiedCaptionContainer>
+        {/* <SimplifiedCaptionContainer>
           <OrangeCaption>Simplified: You owe {"Austin"} $xx.xx</OrangeCaption>
-        </SimplifiedCaptionContainer>
+        </SimplifiedCaptionContainer> */}
         <ExpenseContainer>
           {this.viewState.expenseData?.map((data, index) => (
             <SingleExpense

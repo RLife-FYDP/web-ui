@@ -25,14 +25,15 @@ interface RoommateProps {
   id: number;
 }
 
-interface ExpenseResponseProps {
+export interface ExpenseResponseProps {
   expense_item_id: number;
   amount_owe: number;
   expense_item_description: string;
   expense_item_paid_by_user_id: number;
   expense_item_total_amount: number;
   expense_receipt_url?: string;
-  paid_at: string;
+  expense_created_at: string;
+  paid_at: string | null;
 }
 
 export class ExpensesViewState {
@@ -75,7 +76,7 @@ export class ExpensesViewState {
       ?.map((data) => {
         return {
           id: data.expense_item_id,
-          date: new Date(data.paid_at),
+          date: new Date(data.expense_created_at),
           name: data.expense_item_description,
           paidBy: this.getUserNameById(data.expense_item_paid_by_user_id)!,
           state: data.paid_at,

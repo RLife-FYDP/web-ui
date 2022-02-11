@@ -33,9 +33,9 @@ export class AddExpense extends Component {
         <HeaderContainer>
           <StyledLink to="/expenses">Cancel</StyledLink>
           <Header>New Expense</Header>
-          <StyledLink to="/expenses" onClick={this.viewState.submitNewExpense}>
-            Add
-          </StyledLink>
+          <StyledText onClick={this.viewState.submitNewExpense}>
+            {this.viewState.newExpense.id ? "Save" : "Add"}
+          </StyledText>
         </HeaderContainer>
         <FormContainer>
           <Row>

@@ -1,4 +1,8 @@
-import { authenticatedRequestWithBody } from "./../../api/apiClient";
+import { ExpenseResponseProps } from "./ExpensesViewState";
+import {
+  authenticatedGetRequest,
+  authenticatedRequestWithBody,
+} from "./../../api/apiClient";
 import axios from "axios";
 import {
   action,
@@ -69,8 +73,6 @@ export class AddExpenseViewState {
           return;
         }
 
-        console.log(newValue, prevValue);
-
         const isPreviouslySplitEqual =
           this.newExpense.splits.every(
             (split, _, arr) =>
@@ -100,6 +102,7 @@ export class AddExpenseViewState {
 
   @action
   async init() {
+    this.isLoading = true;
     const user = await getUser();
     const response = await axios.get(
       `http://localhost:8080/suites/${user.suiteId}/users`
@@ -114,13 +117,36 @@ export class AddExpenseViewState {
         color: roommate.color,
       })) ?? [];
 
-    const dataSplit = "?data=";
+    const idSplit = "?id=";
     let url = window.location.href;
-    if (url.indexOf(dataSplit) !== -1) {
-      let splitUrl = url.split(dataSplit);
-      let data = JSON.parse(decodeURIComponent(splitUrl[splitUrl.length - 1]));
-      this.newExpense = data as NewExpenseProps;
+    if (url.indexOf(idSplit) !== -1) {
+      // edit existing task
+      let splitUrl = decodeURI(url).split(idSplit);
+      let id = splitUrl[splitUrl.length - 1];
+      let taskDetailsResp = await authenticatedGetRequest(`/expenses/${id}`);
+      let taskDetailsJson: ExpenseResponseProps & {
+        user_expenses: {
+          amount_owe: number;
+          paid_at: string | null;
+          user_id: number;
+        }[];
+      } = await taskDetailsResp?.json();
+
+      this.newExpense = {
+        id: taskDetailsJson.expense_item_id,
+        expenseName: taskDetailsJson.expense_item_description,
+        amount: taskDetailsJson.expense_item_total_amount,
+        splits: taskDetailsJson.user_expenses.map((expense) => {
+          return {
+            id: expense.user_id,
+            amount: expense.amount_owe,
+            color: "",
+          };
+        }),
+        receipt: taskDetailsJson.expense_receipt_url,
+      };
     }
+    this.isLoading = false;
   }
 
   getUserNameById = (id: number) => {
@@ -167,7 +193,7 @@ export class AddExpenseViewState {
   private async deleteExpenseToServer() {
     this.isLoading = true;
     await authenticatedRequestWithBody(
-      `/expense/${this.newExpense.id}`,
+      `/expenses/${this.newExpense.id}`,
       "",
       "DELETE"
     );
@@ -178,10 +204,9 @@ export class AddExpenseViewState {
 
   private async submitNewExpenseToServer() {
     if (!this.isSplitsTotalEqualToTotalAmount) {
-      alert(
+      return alert(
         "Sum of amounts not matching, which amount would you like to default to? (option of splits or total input)"
       );
-      return;
     }
 
     const body: AddExpenseAPIProps = {
@@ -192,10 +217,15 @@ export class AddExpenseViewState {
       userOwe: this.newExpense.splits,
     };
 
+    const url = this.newExpense.id
+      ? `/expenses/${this.newExpense.id}`
+      : "/expenses/create";
+
     this.isLoading = true;
     await authenticatedRequestWithBody(
-      "/expenses/create",
-      JSON.stringify(body)
+      url,
+      JSON.stringify(body),
+      this.newExpense.id ? "PUT" : "POST"
     );
     this.isLoading = false;
 

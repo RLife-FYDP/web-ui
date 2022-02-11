@@ -18,17 +18,7 @@ export const SingleExpense: React.FC<
   const day = date.getDate();
 
   const onClickExpense = () => {
-    let obj: NewExpenseProps = {
-      id,
-      expenseName: name,
-      amount,
-      splits: [{ id: 1, amount: 2, color: COLORS.NavyBlue }],
-      receipt: "example.com",
-    };
-
-    window.location.href = encodeURI(
-      `${ExpensePageUrl}/add/?data=${JSON.stringify(obj)}`
-    );
+    window.location.href = encodeURI(`${ExpensePageUrl}/add/?id=${id}`);
   };
 
   const onClickCompleteHandler = () => {
@@ -42,10 +32,10 @@ export const SingleExpense: React.FC<
 
   return (
     <TableRow>
-      <TableCell width="7%">
+      <TableCell width="10%">
         <Checkbox onClick={onClickCompleteHandler} />
       </TableCell>
-      <TableCell width="10%">
+      <TableCell width="15%">
         <CreatedDateContainer>
           <CreatedDate>
             <Month>{month}</Month>
@@ -53,13 +43,13 @@ export const SingleExpense: React.FC<
           </CreatedDate>
         </CreatedDateContainer>
       </TableCell>
-      <TableCell width="43%" onClick={onClickExpense}>
+      <TableCell width="40%" onClick={onClickExpense}>
         <Category>
           {/* <GroceryIcon /> */}
           <CategoryText>{name}</CategoryText>
         </Category>
       </TableCell>
-      <TableCell width="20%">
+      <TableCell width="15%">
         <Payee>
           <PaidBy>Paid By</PaidBy>
           <PaidByName>{paidBy}</PaidByName>
@@ -109,7 +99,7 @@ const Day = styled.p`
 const Category = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: left;
+  justify-content: center;
   align-items: center;
   max-width: 100%;
 `;
@@ -154,4 +144,3 @@ const StateHeader = styled.p`
 const Amount = styled.p`
   font-size: 20px;
 `;
-
