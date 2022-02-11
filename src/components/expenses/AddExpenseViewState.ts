@@ -1,4 +1,8 @@
-import { authenticatedRequestWithBody } from "./../../api/apiClient";
+import { ExpenseResponseProps } from "./ExpensesViewState";
+import {
+  authenticatedGetRequest,
+  authenticatedRequestWithBody,
+} from "./../../api/apiClient";
 import axios from "axios";
 import {
   action,
@@ -10,7 +14,7 @@ import {
 import { getUser } from "../../api/apiClient";
 import { ExpensePageUrl } from "../../commonUtils/consts";
 
-interface SplitByAmount {
+export interface SplitByAmount {
   // id of the roommate to be assigned to
   id: number;
   amount: number;
@@ -18,6 +22,7 @@ interface SplitByAmount {
 }
 
 export interface NewExpenseProps {
+  id?: number;
   expenseName: string;
   amount: number;
   splits: SplitByAmount[];
@@ -26,22 +31,24 @@ export interface NewExpenseProps {
 }
 
 interface RoommateProps {
+  first_name: string;
+  last_name: string;
   id: number;
   color: string;
 }
 
-interface RoommateProps {
-  first_name: string;
-  last_name: string;
-  id: number;
-}
-
 interface AddExpenseAPIProps {
+  description: string;
   totalAmount: number;
   paidById: number;
   receiptImgLink?: string;
-  userOwe: {
+  userOwe?: {
     id: number;
+    amount: number;
+  }[];
+  userExpenses?: {
+    userId: number;
+    paidAt: string | null;
     amount: number;
   }[];
 }
@@ -58,11 +65,12 @@ export class AddExpenseViewState {
   @observable private roommateData?: RoommateProps[];
   @observable isLoading: boolean = false;
 
+  private fetchedExpenseDetails?: ExpenseResponseProps;
+
   private myUserId?: number;
 
   constructor() {
     makeAutoObservable(this);
-
     this.init();
 
     reaction(
@@ -89,13 +97,19 @@ export class AddExpenseViewState {
               color: roommate.color,
             })) ?? [];
         } else {
-          this.isSplitsTotalEqualToTotalAmount = false;
+          let sum = this.newExpense.splits.reduce(
+            (acc, split) => split.amount + acc,
+            0
+          );
+          this.isSplitsTotalEqualToTotalAmount = sum === newValue;
         }
       }
     );
   }
 
+  @action
   async init() {
+    this.isLoading = true;
     const user = await getUser();
     const response = await axios.get(
       `http://localhost:8080/suites/${user.suiteId}/users`
@@ -109,7 +123,44 @@ export class AddExpenseViewState {
         amount: 0,
         color: roommate.color,
       })) ?? [];
+
+    const idSplit = "?id=";
+    let url = window.location.href;
+    if (url.indexOf(idSplit) !== -1) {
+      // edit existing task
+      let splitUrl = decodeURI(url).split(idSplit);
+      let id = splitUrl[splitUrl.length - 1];
+      let taskDetailsResp = await authenticatedGetRequest(`/expenses/${id}`);
+      let taskDetailsJson: ExpenseResponseProps & {
+        user_expenses: {
+          amount_owe: number;
+          paid_at: string | null;
+          user_id: number;
+        }[];
+      } = await taskDetailsResp?.json();
+
+      this.fetchedExpenseDetails = taskDetailsJson;
+
+      this.newExpense = {
+        id: taskDetailsJson.expense_item_id,
+        expenseName: taskDetailsJson.expense_item_description,
+        amount: taskDetailsJson.expense_item_total_amount,
+        splits: taskDetailsJson.user_expenses.map((expense) => {
+          return {
+            id: expense.user_id,
+            amount: expense.amount_owe,
+            color: "",
+          };
+        }),
+        receipt: taskDetailsJson.expense_receipt_url,
+      };
+    }
+    this.isLoading = false;
   }
+
+  getUserNameById = (id: number) => {
+    return this.roommates?.find((roommate) => roommate.id === id)?.first_name;
+  };
 
   @computed
   get roommates(): RoommateProps[] | undefined {
@@ -143,6 +194,23 @@ export class AddExpenseViewState {
     this.submitNewExpenseToServer();
   };
 
+  deleteExpense = () => {
+    this.deleteExpenseToServer();
+  };
+
+  @action
+  private async deleteExpenseToServer() {
+    this.isLoading = true;
+    await authenticatedRequestWithBody(
+      `/expenses/${this.newExpense.id}`,
+      "",
+      "DELETE"
+    );
+    this.isLoading = false;
+
+    window.location.href = ExpensePageUrl;
+  }
+
   private async submitNewExpenseToServer() {
     if (!this.isSplitsTotalEqualToTotalAmount) {
       return alert(
@@ -151,16 +219,36 @@ export class AddExpenseViewState {
     }
 
     const body: AddExpenseAPIProps = {
-      totalAmount: this.newExpense.amount,
+      description: this.newExpense.expenseName,
+      totalAmount: parseInt(this.newExpense.amount.toString()),
       paidById: this.myUserId!,
       receiptImgLink: "",
-      userOwe: this.newExpense.splits,
     };
+
+    if (this.newExpense.id !== undefined) {
+      body.userExpenses = this.newExpense.splits.map((split) => {
+        return {
+          amount: split.amount,
+          userId: split.id,
+          paidAt:
+            this.fetchedExpenseDetails?.user_expenses?.find(
+              (expense) => expense.user_id === split.id
+            )?.paid_at ?? null,
+        };
+      });
+    } else {
+      body.userOwe = this.newExpense.splits;
+    }
+
+    const url = this.newExpense.id
+      ? `/expenses/${this.newExpense.id}`
+      : "/expenses/create";
 
     this.isLoading = true;
     await authenticatedRequestWithBody(
-      "/expenses/create",
-      JSON.stringify(body)
+      url,
+      JSON.stringify(body),
+      this.newExpense.id ? "PUT" : "POST"
     );
     this.isLoading = false;
 

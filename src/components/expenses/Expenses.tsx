@@ -4,6 +4,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
+import { Loading } from "../common/Loading";
 import { ExpensesViewState } from "./ExpensesViewState";
 import { SingleExpense } from "./SingleExpense";
 
@@ -11,27 +12,32 @@ import { SingleExpense } from "./SingleExpense";
 export class Expenses extends React.Component {
   @observable private viewState = new ExpensesViewState();
   render() {
-    return (
+    return this.viewState.isLoading || !this.viewState.roommates ? (
+      <Loading />
+    ) : (
       <Container>
         <HeaderContainer>
           <TitleContainer>
             <Title>All Expenses</Title>
-            <Caption>You lent out $xx.xx</Caption>
+            {/* <Caption>You lent out $xx.xx</Caption> */}
           </TitleContainer>
           <AddExpenseButton to="/expenses/add">Add Expense</AddExpenseButton>
         </HeaderContainer>
-        <SimplifiedCaptionContainer>
+        {/* <SimplifiedCaptionContainer>
           <OrangeCaption>Simplified: You owe {"Austin"} $xx.xx</OrangeCaption>
-        </SimplifiedCaptionContainer>
+        </SimplifiedCaptionContainer> */}
         <ExpenseContainer>
-          {this.viewState.testData.map((data, index) => (
+          {this.viewState.expenseData?.map((data, index) => (
             <SingleExpense
               key={index}
+              id={data.id}
               date={data.date}
-              category={data.category}
+              name={data.name}
               paidBy={data.paidBy}
               state={data.state}
               amount={data.amount}
+              onClick={this.viewState.reloadData}
+              splits={[]}
             ></SingleExpense>
           ))}
         </ExpenseContainer>
@@ -46,6 +52,7 @@ const Container = styled.div`
   margin: 8px;
   margin-top: 24px;
   max-height: 100%;
+  overflow-y: scroll;
 `;
 
 const HeaderContainer = styled.div`
@@ -61,6 +68,8 @@ const TitleContainer = styled.div`
 `;
 
 const ExpenseContainer = styled.table`
+  table-layout: fixed;
+  width: 100%;
   margin: 16px 0;
 `;
 

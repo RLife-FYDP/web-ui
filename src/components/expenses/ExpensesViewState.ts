@@ -1,4 +1,7 @@
-import { computed, makeAutoObservable } from "mobx";
+import axios from "axios";
+import { action, computed, makeAutoObservable, observable } from "mobx";
+import { authenticatedGetRequest, getUser } from "../../api/apiClient";
+import { SplitByAmount } from "./AddExpenseViewState";
 
 export enum ExpenseCategory {
   GROCERY = "Groceries",
@@ -6,26 +9,44 @@ export enum ExpenseCategory {
   BILL = "Bills",
 }
 
-export enum ExpenseState {
-  SETTLED = "Settled!",
-  OWED = "You owe",
-  PAID = "You paid",
-}
-
 export interface SingleExpenseProps {
+  id?: number;
   date: Date;
-  category: ExpenseCategory;
-  paidBy: String;
-  state: ExpenseState;
-  amount: String;
+  name: string;
+  paidBy: string;
+  state: string | null | undefined;
+  amount: number;
+  splits: SplitByAmount[];
 }
 
-interface ExpenseResponseProps {
+interface RoommateProps {
+  first_name: string;
+  last_name: string;
+  id: number;
+}
 
+export interface ExpenseResponseProps {
+  expense_item_id: number;
+  amount_owe: number;
+  expense_item_description: string;
+  expense_item_paid_by_user_id: number;
+  expense_item_total_amount: number;
+  expense_receipt_url?: string;
+  expense_created_at: string;
+  paid_at: string | null;
+  user_expenses?: {
+    amount_owe: number;
+    paid_at: string | null;
+    user_id: number;
+  }[];
 }
 
 export class ExpensesViewState {
-  // @observable private responseData?: 
+  @observable private responseData?: ExpenseResponseProps[];
+  @observable private roommateData?: RoommateProps[];
+  @observable isLoading: boolean = false;
+
+  private myUserId?: number;
 
   constructor() {
     makeAutoObservable(this);
@@ -33,34 +54,59 @@ export class ExpensesViewState {
     this.init();
   }
 
+  @action
   async init() {
+    this.isLoading = true;
 
+    const resp = await authenticatedGetRequest("/users/expenses");
+    const data = await resp?.json();
+
+    const user = await getUser();
+    const response = await axios.get(
+      `http://localhost:8080/suites/${user.suiteId}/users`
+    );
+    this.roommateData = response.data;
+    this.responseData = data;
+    this.myUserId = user.id;
+    this.isLoading = false;
+  }
+
+  @action
+  reloadData = () => {
+    this.responseData = undefined;
+    this.roommateData = undefined;
+    this.init();
+  };
+
+  @computed
+  get expenseData(): SingleExpenseProps[] | undefined {
+    return this.responseData
+      ?.filter(
+        (data) =>
+          !data.paid_at && data.expense_item_paid_by_user_id !== this.myUserId
+      )
+      .map((data) => {
+        return {
+          id: data.expense_item_id,
+          date: new Date(data.expense_created_at),
+          name: data.expense_item_description,
+          paidBy: this.getUserNameById(data.expense_item_paid_by_user_id)!,
+          state: data.paid_at,
+          amount: data.amount_owe,
+        } as SingleExpenseProps;
+      })
+      .sort(
+        (expenseA, expenseB) =>
+          expenseA.date.valueOf() - expenseB.date.valueOf()
+      );
   }
 
   @computed
-  get testData(): SingleExpenseProps[] {
-    return [
-      {
-        date: new Date(),
-        category: ExpenseCategory.GROCERY,
-        paidBy: "Austin",
-        state: ExpenseState.OWED,
-        amount: "$40.12",
-      },
-      {
-        date: new Date(),
-        category: ExpenseCategory.GROCERY,
-        paidBy: "You",
-        state: ExpenseState.SETTLED,
-        amount: "",
-      },
-      {
-        date: new Date(),
-        category: ExpenseCategory.GROCERY,
-        paidBy: "Austin",
-        state: ExpenseState.PAID,
-        amount: "$40.12",
-      },
-    ];
+  get roommates(): RoommateProps[] | undefined {
+    return this.roommateData;
   }
+
+  getUserNameById = (id: number) => {
+    return this.roommates?.find((roommate) => roommate.id === id)?.first_name;
+  };
 }

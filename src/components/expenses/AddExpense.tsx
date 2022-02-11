@@ -33,9 +33,9 @@ export class AddExpense extends Component {
         <HeaderContainer>
           <StyledLink to="/expenses">Cancel</StyledLink>
           <Header>New Expense</Header>
-          <StyledLink to="/expenses" onClick={this.viewState.submitNewExpense}>
-            Add
-          </StyledLink>
+          <StyledText onClick={this.viewState.submitNewExpense}>
+            {this.viewState.newExpense.id ? "Save" : "Add"}
+          </StyledText>
         </HeaderContainer>
         <FormContainer>
           <Row>
@@ -64,8 +64,10 @@ export class AddExpense extends Component {
           <UserAmountInputContainer>
             {splits.map((split, index) => {
               return (
-                <SplitContainer>
-                  <UserNameText>{split.id}: </UserNameText>
+                <SplitContainer key={index}>
+                  <UserNameText>
+                    {this.viewState.getUserNameById(split.id)}:{" "}
+                  </UserNameText>
                   <AmountContainer
                     widthPercent={100}
                     progressPercent={
@@ -89,6 +91,11 @@ export class AddExpense extends Component {
               );
             })}
           </UserAmountInputContainer>
+          {this.viewState.newExpense.id ? (
+            <StyledText onClick={this.viewState.deleteExpense}>
+              Delete
+            </StyledText>
+          ) : null}
         </FormContainer>
       </Container>
     );
@@ -214,4 +221,9 @@ const UserAmountInput = styled(Input)<{
   // 4B = 75% opacity
   background: ${({ backgroundColor }) => backgroundColor + "4B"};
   border-radius: 5px;
+`;
+
+const StyledText = styled.p`
+  color: ${COLORS.NavyBlue};
+  cursor: default;
 `;
