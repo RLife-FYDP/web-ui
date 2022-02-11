@@ -81,10 +81,7 @@ export class ExpensesViewState {
   @computed
   get expenseData(): SingleExpenseProps[] | undefined {
     return this.responseData
-      ?.filter(
-        (data) =>
-          !data.paid_at && data.expense_item_paid_by_user_id !== this.myUserId
-      )
+      ?.filter((data) => !data.paid_at)
       .map((data) => {
         return {
           id: data.expense_item_id,
