@@ -37,6 +37,7 @@ export class Expenses extends React.Component {
               state={data.state}
               amount={data.amount}
               onClick={this.viewState.reloadData}
+              splits={[]}
             ></SingleExpense>
           ))}
         </ExpenseContainer>

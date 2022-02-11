@@ -64,7 +64,7 @@ export class AddExpense extends Component {
           <UserAmountInputContainer>
             {splits.map((split, index) => {
               return (
-                <SplitContainer>
+                <SplitContainer key={index}>
                   <UserNameText>
                     {this.viewState.getUserNameById(split.id)}:{" "}
                   </UserNameText>
@@ -91,6 +91,11 @@ export class AddExpense extends Component {
               );
             })}
           </UserAmountInputContainer>
+          {this.viewState.newExpense.id ? (
+            <StyledText onClick={this.viewState.deleteExpense}>
+              Delete
+            </StyledText>
+          ) : null}
         </FormContainer>
       </Container>
     );
@@ -216,4 +221,9 @@ const UserAmountInput = styled(Input)<{
   // 4B = 75% opacity
   background: ${({ backgroundColor }) => backgroundColor + "4B"};
   border-radius: 5px;
+`;
+
+const StyledText = styled.p`
+  color: ${COLORS.NavyBlue};
+  cursor: default;
 `;

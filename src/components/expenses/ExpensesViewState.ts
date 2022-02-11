@@ -1,6 +1,7 @@
 import axios from "axios";
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import { authenticatedGetRequest, getUser } from "../../api/apiClient";
+import { SplitByAmount } from "./AddExpenseViewState";
 
 export enum ExpenseCategory {
   GROCERY = "Groceries",
@@ -15,6 +16,7 @@ export interface SingleExpenseProps {
   paidBy: string;
   state: string | null | undefined;
   amount: number;
+  splits: SplitByAmount[];
 }
 
 interface RoommateProps {
@@ -44,6 +46,7 @@ export class ExpensesViewState {
     this.init();
   }
 
+  @action
   async init() {
     this.isLoading = true;
 

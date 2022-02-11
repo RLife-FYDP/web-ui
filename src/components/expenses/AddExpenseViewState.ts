@@ -10,7 +10,7 @@ import {
 import { getUser } from "../../api/apiClient";
 import { ExpensePageUrl } from "../../commonUtils/consts";
 
-interface SplitByAmount {
+export interface SplitByAmount {
   // id of the roommate to be assigned to
   id: number;
   amount: number;
@@ -69,6 +69,8 @@ export class AddExpenseViewState {
           return;
         }
 
+        console.log(newValue, prevValue);
+
         const isPreviouslySplitEqual =
           this.newExpense.splits.every(
             (split, _, arr) =>
@@ -86,12 +88,17 @@ export class AddExpenseViewState {
               color: roommate.color,
             })) ?? [];
         } else {
-          this.isSplitsTotalEqualToTotalAmount = false;
+          let sum = this.newExpense.splits.reduce(
+            (acc, split) => split.amount + acc,
+            0
+          );
+          this.isSplitsTotalEqualToTotalAmount = sum === newValue;
         }
       }
     );
   }
 
+  @action
   async init() {
     const user = await getUser();
     const response = await axios.get(
@@ -152,11 +159,29 @@ export class AddExpenseViewState {
     this.submitNewExpenseToServer();
   };
 
+  deleteExpense = () => {
+    this.deleteExpenseToServer();
+  };
+
+  @action
+  private async deleteExpenseToServer() {
+    this.isLoading = true;
+    await authenticatedRequestWithBody(
+      `/expense/${this.newExpense.id}`,
+      "",
+      "DELETE"
+    );
+    this.isLoading = false;
+
+    window.location.href = ExpensePageUrl;
+  }
+
   private async submitNewExpenseToServer() {
     if (!this.isSplitsTotalEqualToTotalAmount) {
-      return alert(
+      alert(
         "Sum of amounts not matching, which amount would you like to default to? (option of splits or total input)"
       );
+      return;
     }
 
     const body: AddExpenseAPIProps = {

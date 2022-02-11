@@ -154,3 +154,4 @@ const StateHeader = styled.p`
 const Amount = styled.p`
   font-size: 20px;
 `;
+
