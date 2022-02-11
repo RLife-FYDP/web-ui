@@ -42,8 +42,13 @@ interface AddExpenseAPIProps {
   totalAmount: number;
   paidById: number;
   receiptImgLink?: string;
-  userOwe: {
+  userOwe?: {
     id: number;
+    amount: number;
+  }[];
+  userExpenses?: {
+    userId: number;
+    paidAt: string | null;
     amount: number;
   }[];
 }
@@ -59,6 +64,8 @@ export class AddExpenseViewState {
 
   @observable private roommateData?: RoommateProps[];
   @observable isLoading: boolean = false;
+
+  private fetchedExpenseDetails?: ExpenseResponseProps;
 
   private myUserId?: number;
 
@@ -131,6 +138,8 @@ export class AddExpenseViewState {
           user_id: number;
         }[];
       } = await taskDetailsResp?.json();
+
+      this.fetchedExpenseDetails = taskDetailsJson;
 
       this.newExpense = {
         id: taskDetailsJson.expense_item_id,
@@ -214,8 +223,22 @@ export class AddExpenseViewState {
       totalAmount: parseInt(this.newExpense.amount.toString()),
       paidById: this.myUserId!,
       receiptImgLink: "",
-      userOwe: this.newExpense.splits,
     };
+
+    if (this.newExpense.id !== undefined) {
+      body.userExpenses = this.newExpense.splits.map((split) => {
+        return {
+          amount: split.amount,
+          userId: split.id,
+          paidAt:
+            this.fetchedExpenseDetails?.user_expenses?.find(
+              (expense) => expense.user_id === split.id
+            )?.paid_at ?? null,
+        };
+      });
+    } else {
+      body.userOwe = this.newExpense.splits;
+    }
 
     const url = this.newExpense.id
       ? `/expenses/${this.newExpense.id}`

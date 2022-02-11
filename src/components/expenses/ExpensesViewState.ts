@@ -34,12 +34,19 @@ export interface ExpenseResponseProps {
   expense_receipt_url?: string;
   expense_created_at: string;
   paid_at: string | null;
+  user_expenses?: {
+    amount_owe: number;
+    paid_at: string | null;
+    user_id: number;
+  }[];
 }
 
 export class ExpensesViewState {
   @observable private responseData?: ExpenseResponseProps[];
   @observable private roommateData?: RoommateProps[];
   @observable isLoading: boolean = false;
+
+  private myUserId?: number;
 
   constructor() {
     makeAutoObservable(this);
@@ -60,6 +67,7 @@ export class ExpensesViewState {
     );
     this.roommateData = response.data;
     this.responseData = data;
+    this.myUserId = user.id;
     this.isLoading = false;
   }
 
@@ -73,7 +81,11 @@ export class ExpensesViewState {
   @computed
   get expenseData(): SingleExpenseProps[] | undefined {
     return this.responseData
-      ?.map((data) => {
+      ?.filter(
+        (data) =>
+          !data.paid_at && data.expense_item_paid_by_user_id !== this.myUserId
+      )
+      .map((data) => {
         return {
           id: data.expense_item_id,
           date: new Date(data.expense_created_at),
@@ -83,7 +95,6 @@ export class ExpensesViewState {
           amount: data.amount_owe,
         } as SingleExpenseProps;
       })
-      .filter((data) => !data.state)
       .sort(
         (expenseA, expenseB) =>
           expenseA.date.valueOf() - expenseB.date.valueOf()
