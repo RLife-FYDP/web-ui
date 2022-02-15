@@ -1,8 +1,8 @@
+/* eslint-disable eqeqeq */
 import React from "react";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { SingleExpenseProps } from "./ExpensesViewState";
-import { NewExpenseProps } from "./AddExpenseViewState";
 import { ExpensePageUrl } from "../../commonUtils/consts";
 import { Checkbox } from "../common/Checkbox";
 import { authenticatedRequestWithBody } from "../../api/apiClient";
@@ -45,7 +45,6 @@ export const SingleExpense: React.FC<
       </TableCell>
       <TableCell width="40%" onClick={onClickExpense}>
         <Category>
-          {/* <GroceryIcon /> */}
           <CategoryText>{name}</CategoryText>
         </Category>
       </TableCell>
@@ -58,8 +57,8 @@ export const SingleExpense: React.FC<
       <TableCell width="20%">
         <StateContainer>
           <State>
-            <StateHeader>{state}</StateHeader>
-            <Amount>{amount}</Amount>
+            <StateHeader>{state != undefined ? "Paid" : "Owe"}</StateHeader>
+            <Amount>${amount}</Amount>
           </State>
         </StateContainer>
       </TableCell>
@@ -122,7 +121,7 @@ const PaidBy = styled.p`
 `;
 
 const PaidByName = styled.p`
-  font-size: 20px;
+  font-size: 16px;
 `;
 
 const StateContainer = styled(CreatedDateContainer)`
@@ -142,5 +141,5 @@ const StateHeader = styled.p`
 `;
 
 const Amount = styled.p`
-  font-size: 20px;
+  font-size: 16px;
 `;

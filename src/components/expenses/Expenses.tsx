@@ -1,3 +1,4 @@
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
@@ -7,10 +8,22 @@ import COLORS from "../../commonUtils/colors";
 import { Loading } from "../common/Loading";
 import { ExpensesViewState } from "./ExpensesViewState";
 import { SingleExpense } from "./SingleExpense";
+import { styled as muiStyled } from "@mui/system";
 
 @observer
 export class Expenses extends React.Component {
   @observable private viewState = new ExpensesViewState();
+
+  toggleExpenseFilterHandler = (
+    _: React.MouseEvent<HTMLElement>,
+    newFilter: string | null
+  ) => {
+    if (newFilter === null) {
+      return;
+    }
+    this.viewState.toggleExpenseListFilter(newFilter);
+  };
+
   render() {
     return this.viewState.isLoading || !this.viewState.roommates ? (
       <Loading />
@@ -19,13 +32,17 @@ export class Expenses extends React.Component {
         <HeaderContainer>
           <TitleContainer>
             <Title>All Expenses</Title>
-            {/* <Caption>You lent out $xx.xx</Caption> */}
+            <ToggleButtonGroup
+              exclusive
+              value={this.viewState.expenseFilterState}
+              onChange={this.toggleExpenseFilterHandler}
+            >
+              <StyledToggleButton value="owed">Show owed</StyledToggleButton>
+              <StyledToggleButton value="all">Show all</StyledToggleButton>
+            </ToggleButtonGroup>
           </TitleContainer>
           <AddExpenseButton to="/expenses/add">Add Expense</AddExpenseButton>
         </HeaderContainer>
-        {/* <SimplifiedCaptionContainer>
-          <OrangeCaption>Simplified: You owe {"Austin"} $xx.xx</OrangeCaption>
-        </SimplifiedCaptionContainer> */}
         <ExpenseContainer>
           {this.viewState.expenseData?.map((data, index) => (
             <SingleExpense
@@ -59,6 +76,7 @@ const HeaderContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
 `;
 
 const TitleContainer = styled.div`
@@ -79,19 +97,6 @@ const Title = styled.h1`
   font-size: 24px;
 `;
 
-const Caption = styled.p`
-  font-size: 14px;
-  color: ${COLORS.Yellow};
-`;
-
-const SimplifiedCaptionContainer = styled.div`
-  margin-top: 8px;
-`;
-
-const OrangeCaption = styled(Caption)`
-  color: ${COLORS.Orange};
-`;
-
 const AddExpenseButton = styled(Link)`
   display: flex;
   justify-content: center;
@@ -105,3 +110,9 @@ const AddExpenseButton = styled(Link)`
   background: ${COLORS.Orange};
   text-decoration: none;
 `;
+
+const StyledToggleButton = muiStyled(ToggleButton)({
+  height: "30px",
+  margin: "2px 0",
+  fontSize: "12px",
+});

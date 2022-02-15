@@ -45,6 +45,7 @@ export class ExpensesViewState {
   @observable private responseData?: ExpenseResponseProps[];
   @observable private roommateData?: RoommateProps[];
   @observable isLoading: boolean = false;
+  @observable expenseFilterState: string = "owed";
 
   private myUserId?: number;
 
@@ -78,10 +79,17 @@ export class ExpensesViewState {
     this.init();
   };
 
+  @action
+  toggleExpenseListFilter = (value: string) => {
+    this.expenseFilterState = value;
+  };
+
   @computed
   get expenseData(): SingleExpenseProps[] | undefined {
     return this.responseData
-      ?.filter((data) => !data.paid_at)
+      ?.filter((data) =>
+        this.expenseFilterState === "all" ? true : !data.paid_at
+      )
       .map((data) => {
         return {
           id: data.expense_item_id,
