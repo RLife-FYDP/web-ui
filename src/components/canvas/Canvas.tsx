@@ -21,7 +21,7 @@ export class Canvas extends React.Component<CanvasProps, CanvasState> {
   @observable viewState = new CanvasViewState();
 
   // used for accessing saved canvas drawing
-  @observable private canvasRef: CanvasDraw | null = null;
+  private canvasRef: CanvasDraw | null = null;
 
   constructor(props: CanvasProps) {
     super(props);
