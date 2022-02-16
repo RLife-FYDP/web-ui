@@ -5,6 +5,10 @@ import CanvasDraw from "react-canvas-draw";
 import COLORS from "../../commonUtils/colors";
 
 import { ReactComponent as UndoIcon } from "../../icons/Undo.svg";
+import { ReactComponent as SaveIcon } from "../../icons/SaveIcon.svg";
+import { observable } from "mobx";
+import { CanvasViewState } from "./CanvasViewState";
+import { Loading } from "../common/Loading";
 
 interface CanvasProps {}
 
@@ -14,8 +18,10 @@ interface CanvasState {
 
 @observer
 export class Canvas extends React.Component<CanvasProps, CanvasState> {
+  @observable viewState = new CanvasViewState();
+
   // used for accessing saved canvas drawing
-  private canvasRef: CanvasDraw | null = null;
+  @observable private canvasRef: CanvasDraw | null = null;
 
   constructor(props: CanvasProps) {
     super(props);
@@ -25,7 +31,9 @@ export class Canvas extends React.Component<CanvasProps, CanvasState> {
   }
 
   render() {
-    return (
+    return this.viewState.isLoading ? (
+      <Loading />
+    ) : (
       <Container>
         <ToolSelectionContainer>
           <ColorPickerContainer>
@@ -46,23 +54,31 @@ export class Canvas extends React.Component<CanvasProps, CanvasState> {
           </ColorPickerContainer>
           <CurrentlySelectedContainer>
             <CurrentBrush selectedColor={this.state.canvasBrushColor} />
-            <UndoIcon
+            <StyledUndoIcon
               onClick={() => {
                 this.canvasRef?.undo();
+              }}
+            />
+            <StyledSaveIcon
+              onClick={() => {
+                const data = this.canvasRef?.getSaveData();
+                if (!data) {
+                  return;
+                }
+                this.viewState.updateCanvasToServer(data);
               }}
             />
           </CurrentlySelectedContainer>
         </ToolSelectionContainer>
         <FixedCanvasDraw
-          ref={(ref) => (this.canvasRef = ref)}
+          ref={(ref) => {
+            this.canvasRef = ref;
+          }}
           lazyRadius={0}
           brushColor={this.state.canvasBrushColor}
           brushRadius={2}
-          onChange={(canvas) => {
-            // TODO: do I need debounce? this is the stringified data
-            // can access this through this.canvasRef.getSavedData();
-            console.log(canvas.getSaveData());
-          }}
+          loadTimeOffset={0}
+          saveData={this.viewState.canvasData}
         />
       </Container>
     );
@@ -125,8 +141,16 @@ const CurrentBrush = styled.div<{
 }>`
   width: 30px;
   height: 30px;
-  margin-right: 8px;
+  margin-right: 4px;
   border-radius: 50%;
   border: 1px solid ${COLORS.Black};
   background: ${({ selectedColor }) => selectedColor};
+`;
+
+const StyledUndoIcon = styled(UndoIcon)`
+  margin: 0 4px;
+`;
+
+const StyledSaveIcon = styled(SaveIcon)`
+  margin: 0 4px;
 `;
