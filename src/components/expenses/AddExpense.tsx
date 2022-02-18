@@ -5,6 +5,7 @@ import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { Loading } from "../common/Loading";
+import ImageUpload from "../images/ImageUpload";
 import { AddExpenseViewState } from "./AddExpenseViewState";
 
 @observer
@@ -91,9 +92,14 @@ export class AddExpense extends Component {
               );
             })}
           </UserAmountInputContainer>
+          <UploadImageContainer>
+            <UserNameText>Upload receipt</UserNameText>
+            <ImageUpload onImageUploaded={(url?: string) => this.viewState.setNewExpenseValueByKey({receipt: url})}/>
+            {this.viewState.newExpense.receipt ? <Image src={this.viewState.newExpense.receipt} /> : null}
+          </UploadImageContainer>
           {this.viewState.newExpense.id ? (
             <StyledText onClick={this.viewState.deleteExpense}>
-              Delete
+              Delete Expense
             </StyledText>
           ) : null}
         </FormContainer>
@@ -107,8 +113,16 @@ const Container = styled.div`
   flex-direction: column;
   width: calc(100% - 16px);
   margin: 8px;
-  max-height: 350px;
+  height: 100%;
   overflow-y: scroll;
+`;
+
+const Image = styled.img`
+  max-width: 100%
+`
+
+const UploadImageContainer = styled.div`
+  margin: 8px 0;
 `;
 
 const Row = styled.div`
