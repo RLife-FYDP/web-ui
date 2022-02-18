@@ -1,10 +1,11 @@
 import { observable } from "mobx";
 import { observer } from "mobx-react";
-import { Component } from "react";
+import React, { Component } from "react";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 import { AccessTokenStorageKey, RefreshTokenStorageKey, SignupPageUrl } from "../../commonUtils/consts";
 import { Button } from "../common/Button";
+import ImageCrop from "../images/ImageCrop";
 import { SettingsViewState } from "./SettingsViewState";
 
 @observer
@@ -14,6 +15,9 @@ export class Settings extends Component {
   render() {
     return (
       <Container>
+        <ImageCrop onImageUpdated={canvas => {
+          
+        }} />
         {this.viewState.testData.map((category) => (
           <SectionContainer>
             <Header>{category.sectionName}</Header>
