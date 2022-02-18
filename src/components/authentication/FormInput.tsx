@@ -4,18 +4,21 @@ import styled from "styled-components";
 interface FormInputProps {
   label: string
   type: string
-  name: string
+  name?: string
   autoComplete?: string
-  value: string | number
+  accept?: string
+  value?: string | number
   onChange: (e: React.ChangeEvent<any>) => void;
-  onBlur: React.FocusEventHandler
+  onBlur?: React.FocusEventHandler
 }
 
 export const FormInput: React.FC<FormInputProps> = ({ label, onBlur, ...props }) => {
   const [isSelected, setIsSelected] = useState(false);
   const handleOnBlur = (e: React.FocusEvent) => {
     setIsSelected(false);
-    onBlur(e);
+    if (onBlur) {
+      onBlur(e);
+    }
   };
   return (
     <Container>

@@ -26,7 +26,6 @@ export interface NewExpenseProps {
   expenseName: string;
   amount: number;
   splits: SplitByAmount[];
-  // TODO: attach image?
   receipt?: string;
 }
 
@@ -222,7 +221,7 @@ export class AddExpenseViewState {
       description: this.newExpense.expenseName,
       totalAmount: parseInt(this.newExpense.amount.toString()),
       paidById: this.myUserId!,
-      receiptImgLink: "",
+      receiptImgLink: this.newExpense.receipt,
     };
 
     if (this.newExpense.id !== undefined) {
