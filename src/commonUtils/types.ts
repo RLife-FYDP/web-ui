@@ -27,3 +27,19 @@ export interface User {
   suiteId: number
   updatedAt: Date
 }
+
+export interface Suite {
+  id: number
+  name: string
+  active: boolean
+  canvas: string
+  users?: User[]
+  messages?: ChatMessage[]
+  location: LocationType
+}
+
+export interface ChatMessage {
+  senderId: number;
+  text: string;
+  dateTime: Date
+}

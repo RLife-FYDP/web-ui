@@ -40,13 +40,13 @@ export class Chat extends React.Component {
           <GoBackContainer onClick={this.viewState.showChatOverview}>
             {"<"}
           </GoBackContainer>
-          Marcus Yung
+          {this.viewState.suite?.name}
         </ContactNameContainer>
         <ConversationContainer>
-          {this.viewState.testSingleData.map((data) => (
+          {this.viewState.messages.map((data) => (
             <ChatBubble
               alignment={
-                data.senderId === "0" ? Alignment.LEFT : Alignment.RIGHT
+                data.senderId !== this.viewState.user?.id ? Alignment.LEFT : Alignment.RIGHT
               }
               text={data.text}
             />
@@ -54,8 +54,12 @@ export class Chat extends React.Component {
         </ConversationContainer>
 
         <MessageSenderContainer>
-          <MessageInput />
-          <SendIcon onClick={this.viewState.sendMessage} />
+          <MessageInput id='message-input' onChange={e => this.viewState.updateMessageTextInput(e.target.value)}/>
+          <SendIcon onClick={() => {
+            this.viewState.sendMessage()
+            const input = document.getElementById('message-input') as HTMLInputElement
+            input.value = ''
+          }} />
         </MessageSenderContainer>
       </Container>
     );
@@ -129,7 +133,7 @@ const ContactNameContainer = styled.h2`
 
 const ConversationContainer = styled.div`
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   align-items: center;
   max-height: 100%;
   overflow-y: scroll;
