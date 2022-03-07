@@ -14,11 +14,13 @@ enum LastSender {
 }
 
 interface ChatProps {
-  chatId: string;
+  chatId: number;
   recipantName: string;
   lastText: string;
   lastSender: LastSender;
   chatState: ChatState;
+  timestamp: number;
+  recipientId?: number;
 }
 
 interface ChatMessageRes {
@@ -27,12 +29,18 @@ interface ChatMessageRes {
   updated_at: string
 }
 
+interface UserMessages {
+  [userId: number]: ChatMessage[]
+}
+
 export class ChatViewState {
   @observable private isSingleChatExpanded: boolean = false;
   @observable messages: ChatMessage[] = []
+  @observable userMessages: UserMessages = {}
   @observable user?: User;
   @observable suite?: Suite;
   @observable messageTextInput: string = ''
+  @observable activeChatId: number = -1;
   private socket;
 
   constructor() {
@@ -98,6 +106,7 @@ export class ChatViewState {
   expandChat = (chatId: number) => {
     console.log(`expanding chat ${chatId}`);
     this.isSingleChatExpanded = true;
+    this.activeChatId = chatId;
   };
 
   @computed
@@ -107,14 +116,30 @@ export class ChatViewState {
 
   @computed
   get testData(): ChatProps[] {
-    return [
+    const DMs: ChatProps[] = this.suite?.users?.filter(user => user.id !== this.user?.id).map<ChatProps>((user, i) => {
+      const messages : ChatMessage[] = this.userMessages[user.id] ?? []
+      return {
+        chatId: i+1,
+        recipantName: `${user.firstName} ${user.lastName}`,
+        lastText: messages.length ? messages[messages.length-1].text : '',
+        lastSender: (messages.length && messages[messages.length-1].senderId === this.user?.id) ? LastSender.SELF : LastSender.RECIPANT,
+        chatState: ChatState.READ,
+        timestamp: messages.length ? messages[messages.length-1].dateTime.getTime() : 0,
+        recipientId: user.id
+      }
+    }) ?? []
+    const groupChats: ChatProps[] = [
       {
-        chatId: "0",
+        chatId: 0,
         recipantName: this.suite?.name ?? '',
         lastText: this.messages.length ? this.messages[this.messages.length-1].text : '',
         lastSender: (this.messages.length && this.messages[this.messages.length-1].senderId === this.user?.id) ? LastSender.SELF : LastSender.RECIPANT,
         chatState: ChatState.READ,
+        timestamp: this.messages.length ? this.messages[this.messages.length-1].dateTime.getTime() : 0
       },
     ];
+    const allChats = DMs.concat(groupChats)
+    allChats.sort((a,b) => b.timestamp-a.timestamp)
+    return groupChats
   }
 }

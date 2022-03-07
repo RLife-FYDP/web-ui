@@ -34,16 +34,23 @@ export class Chat extends React.Component {
   }
 
   renderSingleChat() {
+    const activeChat = this.viewState.testData.find(chats => chats.chatId === this.viewState.activeChatId);
+    if (!activeChat) {
+      this.viewState.showChatOverview()
+      return;
+    }
+
+    const messages = activeChat.chatId === 0 ? this.viewState.messages : this.viewState.userMessages[activeChat.chatId]
     return (
       <Container>
         <ContactNameContainer>
           <GoBackContainer onClick={this.viewState.showChatOverview}>
             {"<"}
           </GoBackContainer>
-          {this.viewState.suite?.name}
+          {activeChat.recipantName}
         </ContactNameContainer>
         <ConversationContainer>
-          {this.viewState.messages.map((data) => (
+          {messages.map((data) => (
             <ChatBubble
               alignment={
                 data.senderId !== this.viewState.user?.id ? Alignment.LEFT : Alignment.RIGHT
