@@ -40,7 +40,7 @@ export class Chat extends React.Component {
       return;
     }
 
-    const messages = activeChat.chatId === 0 ? this.viewState.messages : this.viewState.userMessages[activeChat.chatId]
+    const messages = (activeChat.chatId === 0 ? this.viewState.messages : this.viewState.userMessages[activeChat.recipientId ?? 0]) ?? []
     return (
       <Container>
         <ContactNameContainer>
@@ -63,7 +63,7 @@ export class Chat extends React.Component {
         <MessageSenderContainer>
           <MessageInput id='message-input' onChange={e => this.viewState.updateMessageTextInput(e.target.value)}/>
           <SendIcon onClick={() => {
-            this.viewState.sendMessage()
+            this.viewState.sendMessage(activeChat.recipientId)
             const input = document.getElementById('message-input') as HTMLInputElement
             input.value = ''
           }} />
@@ -73,6 +73,7 @@ export class Chat extends React.Component {
   }
 
   render() {
+    console.log(this.viewState.suite?.users)
     return (
       <>
         {this.viewState.showSingleChat

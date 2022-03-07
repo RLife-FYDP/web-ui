@@ -29,7 +29,7 @@ export interface NewExpenseProps {
   receipt?: string;
 }
 
-interface RoommateProps {
+export interface RoommateProps {
   first_name: string;
   last_name: string;
   id: number;
