@@ -30,6 +30,7 @@ const refreshAccessToken = async (refreshToken: string) => {
 };
 
 export const authenticatedGetRequest = async (url: string) => {
+  console.log('authenticatedGetRequest')
   let accessToken = localStorage.getItem(AccessTokenStorageKey);
   const refreshToken = localStorage.getItem(RefreshTokenStorageKey);
   if (!refreshToken) {

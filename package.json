@@ -11,6 +11,8 @@
     "@mui/lab": "^5.0.0-alpha.67",
     "@mui/material": "^5.2.7",
     "@mui/styled-engine-sc": "^5.1.0",
+    "@privacyresearch/libsignal-protocol-typescript": "^0.0.15",
+    "@signalapp/signal-client": "^0.13.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
