@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { ChatMessage, Suite, User } from "../../commonUtils/types";
 import { authenticatedGetRequest, getUser } from "../../api/apiClient";
 import { RoommateProps } from "../expenses/AddExpenseViewState";
-import { decryptMessage, encryptFirstMessage, generateSignalId } from "../../commonUtils/signal";
+import { decryptMessage, encryptFirstMessage, generateSignalId, test } from "../../commonUtils/signal";
 import {
   MessageType,
 } from "@privacyresearch/libsignal-protocol-typescript";
@@ -59,6 +59,7 @@ export class ChatViewState {
     makeAutoObservable(this);
     this.socket = io("http://localhost:8080");
     console.log('constructor')
+    test()
     this.init()
   }
 
@@ -66,7 +67,7 @@ export class ChatViewState {
   async init() {
     this.user = await getUser();
     console.log('init')
-    generateSignalId(this.user.id) // asynchronously generate signal keys
+    // generateSignalId(this.user.id) // asynchronously generate signal keys
     const resList = await Promise.all([authenticatedGetRequest(`/suites/${this.user.suiteId}`), authenticatedGetRequest(`/suites/${this.user.suiteId}/users`)])
     const [suiteData, users] = await Promise.all(resList.map(res => res?.json()))
     this.suite = {
@@ -112,12 +113,12 @@ export class ChatViewState {
       this.userMessages[participant] = []
     }
 
-    const decryptedMessage = await decryptMessage(sender, message)
-    this.userMessages[participant].push({
-      senderId: sender,
-      text: decryptedMessage,
-      dateTime
-    })
+    // const decryptedMessage = await decryptMessage(sender, message)
+    // this.userMessages[participant].push({
+    //   senderId: sender,
+    //   text: decryptedMessage,
+    //   dateTime
+    // })
   }
 
   @action
@@ -137,14 +138,14 @@ export class ChatViewState {
       }
       this.socket.emit('send_message', data)
     } else { // dm
-      const encryptedMessage = await encryptFirstMessage(toUserId!, this.messageTextInput)
-      const data = {
-        suite_id: this.user?.suiteId,
-        from: this.user?.id,
-        to: toUserId,
-        encrypted_message: encryptedMessage
-      }
-      this.socket.emit('send_dm_message', data);
+      // const encryptedMessage = await encryptFirstMessage(toUserId!, this.messageTextInput)
+      // const data = {
+      //   suite_id: this.user?.suiteId,
+      //   from: this.user?.id,
+      //   to: toUserId,
+      //   encrypted_message: encryptedMessage
+      // }
+      // this.socket.emit('send_dm_message', data);
     }
   }
   

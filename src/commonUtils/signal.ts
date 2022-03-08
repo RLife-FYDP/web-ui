@@ -13,10 +13,10 @@ import { authenticatedGetRequest, authenticatedRequestWithBody } from "../api/ap
 
 import {SignalProtocolStore} from './signalStorage'
 
-let store: SignalProtocolStore
+// let store: SignalProtocolStore
 
-export async function generateSignalId(userId: number) {
-  store = new SignalProtocolStore()
+export async function generateSignalId(store: SignalProtocolStore, userId: number) {
+  // store = new SignalProtocolStore()
   console.log('generateSignalId')
   const registrationId = KeyHelper.generateRegistrationId()
   store.put('registrationId', registrationId)
@@ -64,7 +64,8 @@ export async function generateSignalId(userId: number) {
   authenticatedRequestWithBody(`/chat/signal/${userId}/preKeyBundle`, JSON.stringify(reqBody))
 }
 
-export async function encryptFirstMessage(toUserId: number, message: string): Promise<MessageType> {
+export async function encryptFirstMessage(store: SignalProtocolStore, toUserId: number, message: string): Promise<MessageType> {
+  console.log('encryptFirstMessage')
   const res = await authenticatedGetRequest(`/chat/signal/${toUserId}/preKeyBundle`)
   const serializedBundle = await res!.json()
   const bundle: DeviceType = {
@@ -91,14 +92,14 @@ export async function encryptFirstMessage(toUserId: number, message: string): Pr
   return ciphertext!
 }
 
-export async function encryptMessage(toUserId: number, message: string) : Promise<MessageType> {
+export async function encryptMessage(store: SignalProtocolStore, toUserId: number, message: string) : Promise<MessageType> {
   const recipientAddress = new SignalProtocolAddress(toUserId.toString(), 1)
   const sessionCipher = new SessionCipher(store, recipientAddress)
   const ciphertext = await sessionCipher.encrypt(new TextEncoder().encode(message).buffer)
   return ciphertext
 }
 
-export async function decryptMessage(fromUserId: number, message: MessageType): Promise<string> {
+export async function decryptMessage(store: SignalProtocolStore, fromUserId: number, message: MessageType): Promise<string> {
   const remoteAddress = new SignalProtocolAddress(fromUserId.toString(), 1)
   const sessionCipher = new SessionCipher(store, remoteAddress)
   let plaintext : ArrayBuffer = new Uint8Array().buffer;
@@ -128,4 +129,29 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
       bytes[i] = binary_string.charCodeAt(i);
   }
   return bytes.buffer;
+}
+let count = 0
+export async function test() {
+  count++
+  if (count>1) return;
+  const storeA = new SignalProtocolStore()
+  const storeB = new SignalProtocolStore()
+  console.log('before async')
+
+  let _ = await generateSignalId(storeA, 1)
+  _ = await generateSignalId(storeB, 2)
+
+  console.log('before encryptFirstMessage')
+  let encryptedMessage = await encryptFirstMessage(storeA, 2, 'hello world')
+  let decryptedMessage = await decryptMessage(storeB, 1, encryptedMessage)
+  console.log(decryptedMessage)
+
+  encryptedMessage = await encryptMessage(storeA, 2, 'hey banbei')
+  decryptedMessage = await decryptMessage(storeB, 1, encryptedMessage)
+  console.log(decryptedMessage)
+
+  
+  encryptedMessage = await encryptMessage(storeB, 1, 'oh yeah man')
+  decryptedMessage = await decryptMessage(storeA, 2, encryptedMessage)
+  console.log(decryptedMessage)
 }
