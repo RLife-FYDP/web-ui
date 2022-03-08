@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { ChatMessage, Suite, User } from "../../commonUtils/types";
 import { authenticatedGetRequest, getUser } from "../../api/apiClient";
 import { RoommateProps } from "../expenses/AddExpenseViewState";
-import { decryptMessage, encryptFirstMessage, generateSignalId, test } from "../../commonUtils/signal";
+import { decryptMessage, encryptFirstMessage, encryptMessage, generateSignalId } from "../../commonUtils/signal";
 import {
   MessageType,
 } from "@privacyresearch/libsignal-protocol-typescript";
@@ -54,20 +54,20 @@ export class ChatViewState {
   @observable messageTextInput: string = ''
   @observable activeChatId: number = -1;
   private socket;
+  private calls = 0;
 
   constructor() {
     makeAutoObservable(this);
     this.socket = io("http://localhost:8080");
-    console.log('constructor')
-    test()
     this.init()
   }
 
   @action
   async init() {
+    if (this.calls > 0) return;
+    this.calls++;
     this.user = await getUser();
-    console.log('init')
-    // generateSignalId(this.user.id) // asynchronously generate signal keys
+    generateSignalId(this.user.id) // asynchronously generate signal keys
     const resList = await Promise.all([authenticatedGetRequest(`/suites/${this.user.suiteId}`), authenticatedGetRequest(`/suites/${this.user.suiteId}/users`)])
     const [suiteData, users] = await Promise.all(resList.map(res => res?.json()))
     this.suite = {
@@ -84,9 +84,11 @@ export class ChatViewState {
     
     this.messages = this.suite.messages?.sort((a,b) => a.dateTime.getTime() - b.dateTime.getTime()) ?? []
     this.socket.emit('join_room', this.user.suiteId)
+
     this.socket.on('emit_message', (data: ChatGroupMessageRes) => {
       this.receiveGroupMessage(data.from_user, data.content, new Date(data.updated_at + 'Z'))
     })
+
     this.socket.on('emit_dm_message', (data: ChatDmMessageRes) => {
 
       // if (data.to_user !== this.user?.id || data.from_user !== this.user?.id) {
@@ -113,12 +115,12 @@ export class ChatViewState {
       this.userMessages[participant] = []
     }
 
-    // const decryptedMessage = await decryptMessage(sender, message)
-    // this.userMessages[participant].push({
-    //   senderId: sender,
-    //   text: decryptedMessage,
-    //   dateTime
-    // })
+    const decryptedMessage = await decryptMessage(sender, message)
+    this.userMessages[participant].push({
+      senderId: sender,
+      text: decryptedMessage,
+      dateTime
+    })
   }
 
   @action
@@ -138,14 +140,22 @@ export class ChatViewState {
       }
       this.socket.emit('send_message', data)
     } else { // dm
-      // const encryptedMessage = await encryptFirstMessage(toUserId!, this.messageTextInput)
-      // const data = {
-      //   suite_id: this.user?.suiteId,
-      //   from: this.user?.id,
-      //   to: toUserId,
-      //   encrypted_message: encryptedMessage
-      // }
-      // this.socket.emit('send_dm_message', data);
+      const encryptedMessage = await (this.userMessages[toUserId!]?.length ? encryptMessage(toUserId!, this.messageTextInput) : encryptFirstMessage(toUserId!, this.messageTextInput))
+      const data = {
+        suite_id: this.user?.suiteId,
+        from: this.user?.id,
+        to: toUserId,
+        encrypted_message: encryptedMessage
+      }
+      this.socket.emit('send_dm_message', data);
+      if (!this.userMessages[toUserId!]) {
+        this.userMessages[toUserId!] = []
+      }
+      this.userMessages[toUserId!].push({
+        senderId: this.user?.id!,
+        text: this.messageTextInput,
+        dateTime: new Date()
+      })
     }
   }
   

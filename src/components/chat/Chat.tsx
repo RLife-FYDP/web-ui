@@ -19,7 +19,7 @@ export class Chat extends React.Component {
         {this.viewState.testData.map((data, i) => (
           <ChatContainer
             onClick={() => {
-              this.viewState.expandChat(i);
+              this.viewState.expandChat(data.chatId);
             }}
           >
             <ChatIcon />
