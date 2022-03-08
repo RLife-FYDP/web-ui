@@ -3,7 +3,10 @@ import { io } from "socket.io-client";
 import { ChatMessage, Suite, User } from "../../commonUtils/types";
 import { authenticatedGetRequest, getUser } from "../../api/apiClient";
 import { RoommateProps } from "../expenses/AddExpenseViewState";
-
+import { decryptMessage, encryptFirstMessage, generateSignalId } from "../../commonUtils/signal";
+import {
+  MessageType,
+} from "@privacyresearch/libsignal-protocol-typescript";
 enum ChatState {
   READ,
   UNREAD,
@@ -24,14 +27,17 @@ interface ChatProps {
   recipientId?: number;
 }
 
-interface ChatMessageRes {
+interface ChatGroupMessageRes {
   from_user: number
   content: string
   updated_at: string
 }
 
-interface ChatDmMessageRes extends ChatMessageRes{
+interface ChatDmMessageRes {
+  from_user: number
   to_user: number
+  encrypted_message: MessageType
+  updated_at: string
 }
 
 interface UserMessages {
@@ -52,12 +58,15 @@ export class ChatViewState {
   constructor() {
     makeAutoObservable(this);
     this.socket = io("http://localhost:8080");
+    console.log('constructor')
     this.init()
   }
 
   @action
   async init() {
     this.user = await getUser();
+    console.log('init')
+    generateSignalId(this.user.id) // asynchronously generate signal keys
     const resList = await Promise.all([authenticatedGetRequest(`/suites/${this.user.suiteId}`), authenticatedGetRequest(`/suites/${this.user.suiteId}/users`)])
     const [suiteData, users] = await Promise.all(resList.map(res => res?.json()))
     this.suite = {
@@ -66,7 +75,7 @@ export class ChatViewState {
       active: suiteData.active,
       canvas: suiteData.canvas,
       location: suiteData.location,
-      messages: suiteData.messages.map(({from_user, content, updated_at}: ChatMessageRes) => (
+      messages: suiteData.messages.map(({from_user, content, updated_at}: ChatGroupMessageRes) => (
         {senderId: from_user, text: content, dateTime: new Date(updated_at + 'Z')}
       )),
     }
@@ -74,16 +83,17 @@ export class ChatViewState {
     
     this.messages = this.suite.messages?.sort((a,b) => a.dateTime.getTime() - b.dateTime.getTime()) ?? []
     this.socket.emit('join_room', this.user.suiteId)
-    this.socket.on('emit_message', (data: ChatMessageRes) => {
+    this.socket.on('emit_message', (data: ChatGroupMessageRes) => {
       this.receiveGroupMessage(data.from_user, data.content, new Date(data.updated_at + 'Z'))
     })
     this.socket.on('emit_dm_message', (data: ChatDmMessageRes) => {
 
-      if (data.to_user !== this.user?.id && data.from_user !== this.user?.id) {
-        return;
-      }
+      // if (data.to_user !== this.user?.id || data.from_user !== this.user?.id) {
+      //   return;
+      // }
+      if (data.to_user !== this.user?.id) return;
       const participant = data.to_user === this.user?.id ? data.from_user : data.to_user
-      this.receiveDmMessage(data.from_user, participant, data.content, new Date())
+      this.receiveDmMessage(data.from_user, participant, data.encrypted_message, new Date())
     })
   }
 
@@ -97,13 +107,15 @@ export class ChatViewState {
   }
 
   @action
-  receiveDmMessage(sender: number, participant: number, message: string, dateTime: Date) {
+  async receiveDmMessage(sender: number, participant: number, message: MessageType, dateTime: Date) {
     if (!this.userMessages[participant]) {
       this.userMessages[participant] = []
     }
+
+    const decryptedMessage = await decryptMessage(sender, message)
     this.userMessages[participant].push({
       senderId: sender,
-      text: message,
+      text: decryptedMessage,
       dateTime
     })
   }
@@ -114,22 +126,23 @@ export class ChatViewState {
   }
 
   @action
-  sendMessage(toUserId?: number) {
+  async sendMessage(toUserId?: number) {
     if (this.messageTextInput === '') return;
 
-    if (this.activeChatId === 0) {
+    if (this.activeChatId === 0) { // group message
       const data = {
         suite_id: this.user?.suiteId,
         from: this.user?.id,
         message: this.messageTextInput
       }
       this.socket.emit('send_message', data)
-    } else {
+    } else { // dm
+      const encryptedMessage = await encryptFirstMessage(toUserId!, this.messageTextInput)
       const data = {
         suite_id: this.user?.suiteId,
         from: this.user?.id,
         to: toUserId,
-        message: this.messageTextInput
+        encrypted_message: encryptedMessage
       }
       this.socket.emit('send_dm_message', data);
     }
