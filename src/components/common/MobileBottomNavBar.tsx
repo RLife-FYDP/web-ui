@@ -29,6 +29,7 @@ import { observable } from "mobx";
 import { Signup } from "../authentication/Signup";
 import { Settings } from "../settings/Settings";
 import { withAuthentication } from "../../commonUtils/withAuthentication";
+import { CreateSuite } from "../suites/CreateSuite";
 
 @observer
 export class MobileBottomNavBar extends Component {
@@ -59,6 +60,9 @@ export class MobileBottomNavBar extends Component {
         </Route>
         <Route exact path="/settings">
           {withAuthentication(Settings)}
+        </Route>
+        <Route exact path="/create">
+          {withAuthentication(CreateSuite)}
         </Route>
       </Switch>
     );

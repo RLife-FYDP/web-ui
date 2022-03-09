@@ -82,7 +82,7 @@ export const SignupForm: React.FC = () => {
               window.location.href = window.location.href
                 .split("/")
                 .slice(0, -1)
-                .join("/");
+                .join("/")+'/create';
               break;
             default:
               const { message } = await res.json();

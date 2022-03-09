@@ -8,34 +8,14 @@ import COLORS from "../../commonUtils/colors";
 import {
   CreateSuiteViewState,
 } from "./CreateSuiteViewState";
-import { DatePicker } from "@mui/lab";
 import { styled as muiStyled } from "@mui/system";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { FormControl, MenuItem, Select, ToggleButton } from "@mui/material";
-import { Frequency, Weekday } from "rrule";
+import { Chip, Avatar, Select, ToggleButton, FilledInput, InputAdornment, IconButton, MenuItem, Checkbox, ListItemText } from "@mui/material";
+import { AddCircle } from '@mui/icons-material'
 import { Loading } from "../common/Loading";
 
-interface AddSuiteState {
-  page: AddSuitePage;
-}
-
-enum AddSuitePage {
-  SUITE,
-  USERS
-}
-
 @observer
-export class AddTask extends React.Component<{}, AddSuiteState> {
+export class CreateSuite extends React.Component {
   @observable private viewState = new CreateSuiteViewState();
-
-  // Not sure why @observable isn't working on isRepeatableEvent...
-  // will resort to state for now
-  constructor() {
-    super({});
-    this.state = {
-      page: AddSuitePage.SUITE,
-    };
-  }
 
   updateTaskTextField = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     this.viewState.setNewSuiteValueByKey({
@@ -55,12 +35,16 @@ export class AddTask extends React.Component<{}, AddSuiteState> {
     });
   };
 
+  updateEmailField = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.viewState.setEmailInputField(event.target.value)
+  }
+
   renderEditSuitePage() {
     const {newSuite} = this.viewState
     return (
       <FormContainer>
       <Input
-        placeholder="What is your task?"
+        placeholder="Name your suite"
         name="name"
         value={newSuite.name ?? ""}
         onChange={this.updateTaskInput}
@@ -71,24 +55,95 @@ export class AddTask extends React.Component<{}, AddSuiteState> {
         value={newSuite.address ?? ""}
         onChange={this.updateTaskTextField}
       ></DescriptionInput>
+      <Header>Add Roommates</Header>
+      <StyledInputText
+        id="filled-adornment-password"
+        type={'text'}
+        value={this.viewState.emailInputField}
+        onChange={this.updateEmailField}
+        placeholder='Add roommates by email'
+        endAdornment={
+          <InputAdornment position="end">
+            <IconButton
+              onClick={() => this.viewState.addRoommateByEmail(this.viewState.emailInputField)}
+              edge="end"
+            >
+              <AddCircle />
+            </IconButton>
+          </InputAdornment>
+        }
+      />
+      <StyledSelect
+        displayEmpty
+        multiple
+        value={newSuite.users.filter(roommate => roommate.type === 'user').map(user => user.userId)}
+        onChange={(event) => {
+          const inputValue = event.target.value as
+          | string
+          | string[];
+          const values: string[] =
+            typeof inputValue === "string"
+              ? inputValue.split(",")
+              : inputValue;
+          const selectedUserIds = values
+            .map((val) => parseInt(val))
+            .filter((val) => !isNaN(val));
+          this.viewState.addRoommateByUserIds(selectedUserIds)
+        }}
+        renderValue={values => {
+          if (Array.isArray(values) && values.length === 0) {
+            return (
+              <StyledSelectValuePlaceholder>
+                Recommended roommates
+              </StyledSelectValuePlaceholder>
+            );
+          }
+          return (
+            <StyledSelectValuePlaceholder>
+              {(values as number[])
+                .map(userId => this.viewState.matches.find(matchedUser => matchedUser.id === userId)?.firstName)
+                .join(", ")}
+            </StyledSelectValuePlaceholder>
+          );
+        }}
+      >
+        {this.viewState.matches.map(matchedUser => (
+          <MenuItem key={matchedUser.id} value={matchedUser.id} >
+            <Checkbox checked={newSuite.users.some(addedUser => addedUser.userId === matchedUser.id)} />
+            <ListItemText primary={`${matchedUser.firstName} ${matchedUser.lastName}`} />
+          </MenuItem>
+        ))}
+      </StyledSelect>
+      <AddedRoommatesContainer>
+        {newSuite.users.map((roommate, i) => {
+          if (roommate.type === 'email') {
+            return (
+              <Chip
+                avatar={<Avatar>{roommate.email![0]}</Avatar>}
+                label={roommate.email}
+                variant='outlined'
+                onDelete={() => this.viewState.deleteRoommateByIndex(i)}
+              />
+            )
+          } else {
+            const user = this.viewState.matches.find(matchUser => matchUser.id === roommate.userId)
+            return (
+              <Chip
+                avatar={<Avatar alt={user!.firstName} src={user?.profileImageLink} />}
+                label={`${user?.firstName} ${user?.lastName}`}
+                variant='outlined'
+                onDelete={() => this.viewState.deleteRoommateByIndex(i)}
+              />
+            )
+          }
+        })}
+      </AddedRoommatesContainer>
       </FormContainer>
     )
   }
 
-  renderEditUsersPage() {
-    return <></>
-  }
-
   render() {
-    let formPage;
-    switch (this.state.page) {
-      case AddSuitePage.SUITE:
-        formPage = this.renderEditSuitePage()
-        break;
-      case AddSuitePage.USERS:
-      default:
-        formPage = this.renderEditUsersPage()
-    }
+    const formPage = this.renderEditSuitePage()
     return (
       <Container>
         {!this.viewState.isLoading ? (
@@ -96,7 +151,7 @@ export class AddTask extends React.Component<{}, AddSuiteState> {
             {" "}
             <HeaderContainer>
               <Header>New Suite</Header>
-              <StyledText onClick={this.viewState.submitNewUser}>
+              <StyledText onClick={this.viewState.submitNewSuite}>
                 {"Save"}
               </StyledText>
             </HeaderContainer>
@@ -135,6 +190,10 @@ const FormContainer = styled.div`
 
 const Header = styled.p`
   font-size: 18px;
+`;
+
+const StyledSelectValuePlaceholder = styled.p`
+  color: ${COLORS.Gray};
 `;
 
 const StyledLink = styled(NavLink)`
@@ -204,20 +263,26 @@ const StyledSelect = muiStyled(Select)(() => ({
   },
 }));
 
-const StyledSelectValueHolder = styled.p`
-  color: ${COLORS.DarkGray};
-`;
+const StyledInputText = muiStyled(FilledInput)(() => ({
+  height: "38px",
+  margin: "2px 0",
+  background: COLORS.Graphite,
+  fontSize: '18px',
+  fontFamily: "Arial",
+  color: COLORS.Gray,
+  border: "none",
 
-const StyledSelectValuePlaceholder = styled.p`
-  color: ${COLORS.Gray};
-`;
+  "& input": {
+    paddingTop: '8px',
+    color: COLORS.DarkGray,
+  },
 
-const RRuleDateText = styled.em`
-  margin-top: 4px;
-  color: ${COLORS.Gray};
-  font-size: 12px;
+  "& fieldset": {
+    border: "none",
+  },
+}))
 
-  &:first-letter {
-    text-transform: capitalize;
-  }
-`;
+const AddedRoommatesContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+`
