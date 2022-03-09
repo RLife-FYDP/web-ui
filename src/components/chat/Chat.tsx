@@ -25,7 +25,7 @@ export class Chat extends React.Component {
             <ChatIcon />
             <MessageContainer>
               <ChatHead>{data.recipantName}</ChatHead>
-              <ChatMessage>{data.lastText}</ChatMessage>
+              <ChatMessage>{data.lastText.length > 30 ? `${data.lastText.substring(0,30)}...` : data.lastText}</ChatMessage>
             </MessageContainer>
           </ChatContainer>
         ))}
