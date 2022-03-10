@@ -102,25 +102,27 @@ export class CreateSuiteViewState {
       `/matches/${this.user.id}/findMatches`
     );
     const matches = await res!.json();
-    this.matches = matches.map((matchedUser: any) => {
-      const user: User = {
-        age: matchedUser.age,
-        birthday: new Date(matchedUser.birthday),
-        createdAt: new Date(matchedUser.created_at),
-        email: matchedUser.email,
-        expenseItems: [], // TODO
-        firstName: matchedUser.first_name,
-        gender: matchedUser.gender,
-        id: matchedUser.id,
-        lastName: matchedUser.last_name,
-        location: {}, //TODO
-        profileImageLink: matchedUser.profile_img_link,
-        rating: matchedUser.rating,
-        suiteId: matchedUser.suite?.id,
-        updatedAt: new Date(matchedUser.updated_at),
-      };
-      return user;
-    });
+    this.matches = matches
+      .filter((match: any) => match.id !== this.user?.id)
+      .map((matchedUser: any) => {
+        const user: User = {
+          age: matchedUser.age,
+          birthday: new Date(matchedUser.birthday),
+          createdAt: new Date(matchedUser.created_at),
+          email: matchedUser.email,
+          expenseItems: [], // TODO
+          firstName: matchedUser.first_name,
+          gender: matchedUser.gender,
+          id: matchedUser.id,
+          lastName: matchedUser.last_name,
+          location: {}, //TODO
+          profileImageLink: matchedUser.profile_img_link,
+          rating: matchedUser.rating,
+          suiteId: matchedUser.suite?.id,
+          updatedAt: new Date(matchedUser.updated_at),
+        };
+        return user;
+      });
   }
 
   @action
