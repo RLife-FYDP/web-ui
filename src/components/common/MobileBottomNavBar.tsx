@@ -114,7 +114,13 @@ export class MobileBottomNavBar extends Component {
                 !(
                   this.path.includes("settings") || this.path.includes("create")
                 ) ? (
-                  <NotificationBar viewState={this.notificationsViewState} />
+                  <NotificationBar
+                    userName={this.notificationsViewState.testName}
+                    suiteName={this.notificationsViewState.roomName}
+                    closeNotifications={this.notificationsViewState.closeNotifications}
+                    testData={this.notificationsViewState.testData}
+                    isLoading={this.notificationsViewState.isLoading}
+                  />
                 ) : null}
                 <ComponentContainer
                   isNotificationsActive={

@@ -5,26 +5,34 @@ import COLORS from "../../commonUtils/colors";
 import WaveHandIcon from "../../icons/WaveHandIcon.svg";
 import ChatBubbleIcon from "../../icons/ChatBubbleIcon.svg";
 
-import { NotificationBarViewState } from "./NotificationBarViewState";
+import { NotificationBarViewState, NotificationProps } from "./NotificationBarViewState";
 import { NotificationBubble } from "../notifications/NotificationBubble";
 
 interface NotificationBarProps {
-  viewState: NotificationBarViewState;
+  userName: string;
+  suiteName: string
+  closeNotifications: () => void
+  testData: NotificationProps[]
+  isLoading: boolean
 }
 
 export const NotificationBar: React.FC<NotificationBarProps> = ({
-  viewState,
+  userName,
+  suiteName,
+  closeNotifications,
+  testData,
+  isLoading
 }) => {
   return (
     <Container>
-      <CloseContainer onClick={viewState.closeNotifications}>x</CloseContainer>
-      <Header>
-        Welcome back to {viewState.roomName}, {viewState.testName}
+      <CloseContainer onClick={closeNotifications}>x</CloseContainer>
+      {isLoading ? null : <><Header>
+        Welcome back to {suiteName}, {userName}
         <Icon src={WaveHandIcon} />
       </Header>
       <Caption>Here's what you've missed!</Caption>
       <NotificationsContainer>
-        {viewState.testData.map((data, index) => {
+        {testData.map((data, index) => {
           switch (data.taskType) {
             // case TaskType.ACHIEVEMENT:
             //   return "hello";
@@ -33,14 +41,14 @@ export const NotificationBar: React.FC<NotificationBarProps> = ({
                 <NotificationBubble
                   key={index}
                   backgroundColor={COLORS.SkyBlue}
-                  numNotifications={4}
+                  numNotifications={data.numNotificationsMissed}
                   notificationType="Expenses"
                   icon={ChatBubbleIcon}
                 />
               );
           }
         })}
-      </NotificationsContainer>
+      </NotificationsContainer></>}
     </Container>
   );
 };
