@@ -26,7 +26,7 @@ export interface User {
   profileImageLink: string;
   rating: number;
   setting?: Setting;
-  suiteId: number;
+  suiteId?: number;
   updatedAt: Date;
 }
 
