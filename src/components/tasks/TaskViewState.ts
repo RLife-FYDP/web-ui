@@ -28,7 +28,7 @@ interface ResponseProps {
   start_time: string;
   rrule_option?: string;
   last_completed?: string;
-  is_completed: boolean;
+  is_completed: number;
 }
 
 export class TaskViewState {
@@ -64,7 +64,6 @@ export class TaskViewState {
     let task = this.getTaskDetailsById(id)!;
     let today = new Date();
     let rule = new RRule(task.rruleOptions);
-    let isFullyComplete = task.rruleOptions ? rule.all().length === 0 : true;
     today.setHours(0, 0, 0, 0);
 
     if (toDelete) {
@@ -72,19 +71,8 @@ export class TaskViewState {
       return this.reloadData();
     }
 
-    if (isFullyComplete || !task.rruleOptions) {
+    if (!task.rruleOptions) {
       // task is completely done
-
-      let newStartDate = rule.all()[0];
-      newStartDate.setDate(rule.all()[0].getDate() + 1);
-
-      if (task.rruleOptions) {
-        task.rruleOptions.dtstart = newStartDate;
-      }
-
-      rule = new RRule(task.rruleOptions);
-
-      const rruleString = rule.toString();
       const body = JSON.stringify({
         title: task.title,
         description: task.description,
@@ -93,19 +81,28 @@ export class TaskViewState {
         points: 2,
         assignee: task.assignee,
         startTime: task.startDate,
-        rruleOption: rruleString,
-        lastCompleted: new Date(),
-        isCompleted: true,
+        rruleOption: "",
+        lastCompleted: today,
+        isCompleted: 1,
       });
 
       await authenticatedRequestWithBody(`/tasks/${task.id}`, body, "PUT");
       return this.reloadData();
     }
 
-    let newStartDate = rule.all()[0];
-    newStartDate.setDate(rule.all()[0].getDate() + 1);
+    // dealing with rrule here
+    let newStartDate;
+    let lengthOfRrule = rule.all().length;
+    if (lengthOfRrule === 0) {
+      newStartDate = new Date(rule.options.until!);
+    } else {
+      newStartDate = rule.all()[0];
+    }
 
-    task.rruleOptions.dtstart = newStartDate;
+    newStartDate.setDate(newStartDate.getDate() + 1);
+    console.log(newStartDate);
+
+    task.rruleOptions.dtstart = new Date(newStartDate);
     rule = new RRule(task.rruleOptions);
 
     const rruleString = rule.toString();
@@ -119,7 +116,7 @@ export class TaskViewState {
       startTime: task.startDate,
       rruleOption: rruleString,
       lastCompleted: new Date(),
-      isCompleted: false,
+      isCompleted: rule.all().length === 0 ? 1 : 0,
     });
 
     await authenticatedRequestWithBody(`/tasks/${task.id}`, body, "PUT");
@@ -174,24 +171,16 @@ export class TaskViewState {
       this.tasks = [];
     }
 
-    const filterBySelector = this.responseData.filter((task) => {
-      if (this.taskViewFilter === "all") {
-        return true;
-      }
+    // const filteredData = this.responseData.filter((task) => {
+    //   if (task.rrule_option && task.rrule_option !== "") {
+    //     let rrule = rrulestr(task.rrule_option);
+    //     return rrule.all().length !== 0;
+    //   }
 
-      return task.is_completed === false;
-    });
+    //   return new Date(task.start_time);
+    // });
 
-    const filteredData = filterBySelector.filter((task) => {
-      if (task.rrule_option && task.rrule_option !== "") {
-        let rrule = rrulestr(task.rrule_option);
-        return rrule.all().length !== 0;
-      }
-
-      return new Date(task.start_time);
-    });
-
-    const processedTasksByDate = _.groupBy(filteredData, (task) => {
+    const processedTasksByDate = _.groupBy(this.responseData, (task) => {
       const history = new Date(0).valueOf();
       const today = new Date().setHours(0, 0, 0, 0);
       let dateObject = new Date(task.start_time);
@@ -201,7 +190,12 @@ export class TaskViewState {
       if (task.rrule_option && task.rrule_option !== "") {
         let rrule = rrulestr(task.rrule_option);
         // will always exist since we filtered it above
-        startOfDay = rrule.all()[0].setHours(0, 0, 0, 0);
+        let lengthOfRrule = rrule.all().length;
+        if (lengthOfRrule === 0) {
+          startOfDay = new Date(rrule.options.until!).setHours(0, 0, 0, 0);
+        } else {
+          startOfDay = rrule.all()[0].setHours(0, 0, 0, 0);
+        }
       }
 
       // grouping everything that is overdue into "yesterday"
@@ -222,6 +216,7 @@ export class TaskViewState {
               rruleOptions: task.rrule_option,
               startDate: new Date(task.start_time),
               assignee: task.users.map(({ id }) => id),
+              isCompleted: task.is_completed,
             } as SingleTaskProps;
           }),
         };
@@ -233,6 +228,18 @@ export class TaskViewState {
 
   @computed
   get assignedTasks(): TaskProps[] | undefined {
-    return this.tasks;
+    return this.tasks
+      ?.map(({ taskSection, taskDetails }) => {
+        const filteredTaskDetails = taskDetails.filter(
+          (details) =>
+            details.isCompleted ===
+            (this.taskViewFilter === "incomplete" ? 0 : 1)
+        );
+        return {
+          taskSection,
+          taskDetails: filteredTaskDetails,
+        };
+      })
+      .filter(({ taskDetails }) => taskDetails.length > 0);
   }
 }
