@@ -1,4 +1,5 @@
 /* eslint-disable eqeqeq */
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
@@ -9,6 +10,7 @@ import { AddTaskButton } from "./AddTaskButton";
 import { AddTaskViewState } from "./AddTaskViewState";
 import { SingleTask } from "./SingleTask";
 import { TaskViewState } from "./TaskViewState";
+import { styled as muiStyled } from "@mui/system";
 
 interface TasksState {
   isEditState: number | undefined;
@@ -40,6 +42,16 @@ export class Tasks extends React.Component<{}, TasksState> {
     this.viewState.updateTaskCheckpoint(id, true);
   };
 
+  toggleTaskListFilter = (
+    _: React.MouseEvent<HTMLElement>,
+    newFilter: string | null
+  ) => {
+    if (newFilter === null) {
+      return;
+    }
+    this.viewState.toggleTaskListFilter(newFilter);
+  };
+
   render() {
     const tasks = this.viewState.assignedTasks;
     const today = new Date();
@@ -53,35 +65,47 @@ export class Tasks extends React.Component<{}, TasksState> {
           tasks.length === 0 ? (
             <h3>No Tasks Yet</h3>
           ) : (
-            tasks.map((data, index) => {
-              const header =
-                data.taskSection < today
-                  ? "Overdue"
-                  : data.taskSection.toLocaleDateString();
-              return (
-                <SectionContainer key={index}>
-                  <SectionTitle>{header}</SectionTitle>
-                  {data.taskDetails.map((details) => {
-                    return (
-                      <SingleTask
-                        key={details.id!}
-                        id={details.id!}
-                        title={details.title}
-                        rruleOptions={details.rruleOptions}
-                        startDate={details.startDate}
-                        assignee={details.assignee}
-                        assigneeNames={details.assignee.map(
-                          (id) =>
-                            this.addTaskViewState.getNameById(id, false) ?? ""
-                        )}
-                        onClick={this.handleViewTask}
-                        onClickComplete={this.handleTaskComplete}
-                      />
-                    );
-                  })}
-                </SectionContainer>
-              );
-            })
+            <>
+              <ToggleButtonGroup
+                exclusive
+                value={this.viewState.taskViewFilter}
+                onChange={this.toggleTaskListFilter}
+              >
+                <StyledToggleButton value="incomplete">
+                  Show incomplete
+                </StyledToggleButton>
+                <StyledToggleButton value="all">Show all</StyledToggleButton>
+              </ToggleButtonGroup>
+              {tasks.map((data, index) => {
+                const header =
+                  data.taskSection < today
+                    ? "Overdue"
+                    : data.taskSection.toLocaleDateString();
+                return (
+                  <SectionContainer key={index}>
+                    <SectionTitle>{header}</SectionTitle>
+                    {data.taskDetails.map((details) => {
+                      return (
+                        <SingleTask
+                          key={details.id!}
+                          id={details.id!}
+                          title={details.title}
+                          rruleOptions={details.rruleOptions}
+                          startDate={details.startDate}
+                          assignee={details.assignee}
+                          assigneeNames={details.assignee.map(
+                            (id) =>
+                              this.addTaskViewState.getNameById(id, false) ?? ""
+                          )}
+                          onClick={this.handleViewTask}
+                          onClickComplete={this.handleTaskComplete}
+                        />
+                      );
+                    })}
+                  </SectionContainer>
+                );
+              })}
+            </>
           )
         ) : (
           <AddTask
@@ -107,6 +131,13 @@ const Container = styled.div`
   margin: 8px;
   overflow-y: scroll;
 `;
+
+const StyledToggleButton = muiStyled(ToggleButton)({
+  height: "30px",
+  width: "50%",
+  margin: "2px 0",
+  fontSize: "12px",
+});
 
 const SectionContainer = styled.div`
   display: flex;

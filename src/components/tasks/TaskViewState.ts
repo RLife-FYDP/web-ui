@@ -28,10 +28,12 @@ interface ResponseProps {
   start_time: string;
   rrule_option?: string;
   last_completed?: string;
+  is_completed: boolean;
 }
 
 export class TaskViewState {
   private responseData?: ResponseProps[];
+  @observable taskViewFilter: string = "incomplete";
   @observable private tasks?: TaskProps[];
 
   constructor() {
@@ -53,16 +55,50 @@ export class TaskViewState {
     this.parseResponse();
   }
 
+  @action
+  toggleTaskListFilter = (value: string) => {
+    this.taskViewFilter = value;
+  };
+
   async updateTaskCheckpoint(id: number, toDelete = false) {
     let task = this.getTaskDetailsById(id)!;
     let today = new Date();
     let rule = new RRule(task.rruleOptions);
-    let canBeDeleted = task.rruleOptions ? rule.all().length === 0 : true;
+    let isFullyComplete = task.rruleOptions ? rule.all().length === 0 : true;
     today.setHours(0, 0, 0, 0);
 
-    if (canBeDeleted || toDelete || !task.rruleOptions) {
-      // delete task now that we're done
+    if (toDelete) {
       await authenticatedRequestWithBody(`/tasks/${task.id}`, "", "DELETE");
+      return this.reloadData();
+    }
+
+    if (isFullyComplete || !task.rruleOptions) {
+      // task is completely done
+
+      let newStartDate = rule.all()[0];
+      newStartDate.setDate(rule.all()[0].getDate() + 1);
+
+      if (task.rruleOptions) {
+        task.rruleOptions.dtstart = newStartDate;
+      }
+
+      rule = new RRule(task.rruleOptions);
+
+      const rruleString = rule.toString();
+      const body = JSON.stringify({
+        title: task.title,
+        description: task.description,
+        // TODO: temp tags
+        tags: "2",
+        points: 2,
+        assignee: task.assignee,
+        startTime: task.startDate,
+        rruleOption: rruleString,
+        lastCompleted: new Date(),
+        isCompleted: true,
+      });
+
+      await authenticatedRequestWithBody(`/tasks/${task.id}`, body, "PUT");
       return this.reloadData();
     }
 
@@ -83,6 +119,7 @@ export class TaskViewState {
       startTime: task.startDate,
       rruleOption: rruleString,
       lastCompleted: new Date(),
+      isCompleted: false,
     });
 
     await authenticatedRequestWithBody(`/tasks/${task.id}`, body, "PUT");
@@ -137,7 +174,15 @@ export class TaskViewState {
       this.tasks = [];
     }
 
-    const filteredData = this.responseData.filter((task) => {
+    const filterBySelector = this.responseData.filter((task) => {
+      if (this.taskViewFilter === "all") {
+        return true;
+      }
+
+      return task.is_completed === false;
+    });
+
+    const filteredData = filterBySelector.filter((task) => {
       if (task.rrule_option && task.rrule_option !== "") {
         let rrule = rrulestr(task.rrule_option);
         return rrule.all().length !== 0;
@@ -145,26 +190,6 @@ export class TaskViewState {
 
       return new Date(task.start_time);
     });
-
-    // TODO: remove this if tests work after
-    // const taskSortedByDate = filteredData.sort((taskA, taskB) => {
-    //   let dateA = new Date(taskA.start_time);
-    //   let dateB = new Date(taskB.start_time);
-
-    //   if (taskA.rrule_option) {
-    //     let rrule = rrulestr(taskA.rrule_option);
-    //     let firstOccurence = rrule.after(new Date(taskA.last_completed));
-    //     dateA = firstOccurence;
-    //   }
-
-    //   if (taskB.rrule_option) {
-    //     let rrule = rrulestr(taskB.rrule_option);
-    //     let firstOccurence = rrule.after(new Date(taskB.last_completed));
-    //     dateA = firstOccurence;
-    //   }
-
-    //   return dateA.getTime() - dateB.getTime();
-    // });
 
     const processedTasksByDate = _.groupBy(filteredData, (task) => {
       const history = new Date(0).valueOf();
