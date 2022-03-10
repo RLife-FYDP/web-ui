@@ -10,10 +10,12 @@ export enum Alignment {
 interface ChatBubbleProps {
   alignment: Alignment;
   text: string;
+  senderName?: string;
 }
 
-export const ChatBubble: React.FC<ChatBubbleProps> = ({ alignment, text }) => (
+export const ChatBubble: React.FC<ChatBubbleProps> = ({ alignment, text, senderName }) => (
   <Container alignment={alignment}>
+    {senderName != undefined ? senderName : null}
     <Bubble alignment={alignment}>
       {text}
     </Bubble>
