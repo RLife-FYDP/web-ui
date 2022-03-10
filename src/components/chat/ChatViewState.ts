@@ -25,6 +25,7 @@ interface ChatProps {
   chatState: ChatState;
   timestamp: number;
   recipientId?: number;
+  avatarUrl?: string
 }
 
 interface ChatGroupMessageRes {
@@ -188,7 +189,8 @@ export class ChatViewState {
         lastSender: (messages.length && messages[messages.length-1].senderId === this.user?.id) ? LastSender.SELF : LastSender.RECIPANT,
         chatState: ChatState.READ,
         timestamp: messages.length ? messages[messages.length-1].dateTime.getTime() : 0,
-        recipientId: user.id
+        recipientId: user.id,
+        avatarUrl: user.profile_img_link,
       }
     }) ?? []
     const groupChats: ChatProps[] = [

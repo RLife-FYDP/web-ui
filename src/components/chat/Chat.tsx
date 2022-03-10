@@ -8,6 +8,7 @@ import { Alignment, ChatBubble } from "./ChatBubble";
 import { ChatViewState } from "./ChatViewState";
 import { ReactComponent as SendIcon } from "../../icons/SendMessage.svg";
 import { Loading } from "../common/Loading";
+import { Avatar } from "@mui/material";
 
 @observer
 export class Chat extends React.Component {
@@ -26,7 +27,7 @@ export class Chat extends React.Component {
               this.viewState.expandChat(data.chatId);
             }}
           >
-            <ChatIcon />
+            <Avatar alt={data.recipantName} src={data.avatarUrl} sx={{width: 50, height: 50, marginRight: '16px'}}/>
             <MessageContainer>
               <ChatHead>{data.recipantName}</ChatHead>
               <ChatMessage>

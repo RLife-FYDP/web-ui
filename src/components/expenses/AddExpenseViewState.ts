@@ -32,6 +32,7 @@ export interface NewExpenseProps {
 export interface RoommateProps {
   first_name: string;
   last_name: string;
+  profile_img_link: string
   id: number;
   color: string;
 }
