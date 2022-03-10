@@ -168,10 +168,13 @@ export class AddTaskViewState {
   }
 
   private async submitTaskToServer() {
+    this.newTask.startDate.setHours(0, 0, 0, 0);
+    if (this.newTask.rruleOptions) {
+      this.newTask.rruleOptions.dtstart = this.newTask.startDate;
+    }
     const rule = new RRule(this.newTask.rruleOptions);
     const rruleString = rule.toString();
 
-    this.newTask.startDate.setHours(0, 0, 0, 0);
     const body: any = {
       title: this.newTask.title,
       description: this.newTask.description,
