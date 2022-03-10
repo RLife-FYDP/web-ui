@@ -92,25 +92,18 @@ export class CreateSuiteViewState {
     users: [],
   };
 
-  @observable private roommateData?: ResponseProps[];
   @observable matches: User[] = [];
   @observable isLoading: boolean = false;
   @observable emailInputField: string = "";
   private user?: User;
 
-  constructor(taskToEdit?: SingleSuiteProps) {
+  constructor() {
     makeAutoObservable(this);
     this.init();
-
-    this.newSuite = taskToEdit ?? this.newSuite;
   }
 
   async init() {
     this.user = await getUser();
-    const response = await axios.get(
-      `http://localhost:8080/suites/${this.user.suiteId}/users`
-    );
-    this.roommateData = response.data;
     const res = await authenticatedGetRequest(
       `/matches/${this.user.id}/findMatches`
     );
@@ -134,11 +127,6 @@ export class CreateSuiteViewState {
       };
       return user;
     });
-  }
-
-  @computed
-  get roommates(): ResponseProps[] | undefined {
-    return this.roommateData;
   }
 
   @action
@@ -167,16 +155,6 @@ export class CreateSuiteViewState {
   @action
   deleteRoommateByIndex = (index: number) => {
     this.newSuite.users.splice(index, 1);
-  };
-
-  getNameById = (
-    id: number,
-    includeLastName: boolean = false
-  ): string | undefined => {
-    const roommate = this.roommateData?.find((roommate) => roommate.id === id);
-    return includeLastName
-      ? `${roommate?.first_name} ${roommate?.last_name}`
-      : roommate?.first_name;
   };
 
   deleteTask = () => {
