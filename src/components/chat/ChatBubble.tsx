@@ -15,7 +15,7 @@ interface ChatBubbleProps {
 
 export const ChatBubble: React.FC<ChatBubbleProps> = ({ alignment, text, senderName }) => (
   <Container alignment={alignment}>
-    {senderName != null ? senderName : null}
+    {senderName != undefined ? senderName : null}
     <Bubble alignment={alignment}>
       {text}
     </Bubble>

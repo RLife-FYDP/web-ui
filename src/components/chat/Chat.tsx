@@ -76,7 +76,7 @@ export class Chat extends React.Component {
                     ? Alignment.LEFT
                     : Alignment.RIGHT
                 }
-                senderName={senderName}
+                senderName={activeChat.chatId === 0 ? senderName : undefined}
                 text={data.text}
               />
             )
