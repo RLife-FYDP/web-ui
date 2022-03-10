@@ -194,6 +194,6 @@ export class AddTaskViewState {
     }
     this.isLoading = false;
 
-    // window.location.href = TaskPageUrl;
+    window.location.href = TaskPageUrl;
   }
 }
