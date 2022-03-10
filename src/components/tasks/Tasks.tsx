@@ -50,35 +50,39 @@ export class Tasks extends React.Component<{}, TasksState> {
         {tasks == undefined ? (
           <Loading />
         ) : this.state.isEditState == undefined ? (
-          tasks.map((data, index) => {
-            const header =
-              data.taskSection < today
-                ? "Overdue"
-                : data.taskSection.toLocaleDateString();
-            return (
-              <SectionContainer key={index}>
-                <SectionTitle>{header}</SectionTitle>
-                {data.taskDetails.map((details) => {
-                  return (
-                    <SingleTask
-                      key={details.id!}
-                      id={details.id!}
-                      title={details.title}
-                      rruleOptions={details.rruleOptions}
-                      startDate={details.startDate}
-                      assignee={details.assignee}
-                      assigneeNames={details.assignee.map(
-                        (id) =>
-                          this.addTaskViewState.getNameById(id, false) ?? ""
-                      )}
-                      onClick={this.handleViewTask}
-                      onClickComplete={this.handleTaskComplete}
-                    />
-                  );
-                })}
-              </SectionContainer>
-            );
-          })
+          tasks.length === 0 ? (
+            <h3>No Tasks Yet</h3>
+          ) : (
+            tasks.map((data, index) => {
+              const header =
+                data.taskSection < today
+                  ? "Overdue"
+                  : data.taskSection.toLocaleDateString();
+              return (
+                <SectionContainer key={index}>
+                  <SectionTitle>{header}</SectionTitle>
+                  {data.taskDetails.map((details) => {
+                    return (
+                      <SingleTask
+                        key={details.id!}
+                        id={details.id!}
+                        title={details.title}
+                        rruleOptions={details.rruleOptions}
+                        startDate={details.startDate}
+                        assignee={details.assignee}
+                        assigneeNames={details.assignee.map(
+                          (id) =>
+                            this.addTaskViewState.getNameById(id, false) ?? ""
+                        )}
+                        onClick={this.handleViewTask}
+                        onClickComplete={this.handleTaskComplete}
+                      />
+                    );
+                  })}
+                </SectionContainer>
+              );
+            })
+          )
         ) : (
           <AddTask
             taskToEdit={this.viewState.getTaskDetailsById(

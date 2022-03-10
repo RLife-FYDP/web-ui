@@ -213,7 +213,7 @@ const AmountContainer = styled.div<{
         ? "0"
         : Math.min(100, progressPercent * 100) + "%"};
     transition: width 0.3s linear;
-    background: ${({ color }) => (color == null ? COLORS.Orange : color)};
+    background: ${COLORS.Orange};
     border-radius: 5px;
   }
 `;

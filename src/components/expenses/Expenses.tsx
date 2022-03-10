@@ -44,19 +44,23 @@ export class Expenses extends React.Component {
           <AddExpenseButton to="/expenses/add">Add Expense</AddExpenseButton>
         </HeaderContainer>
         <ExpenseContainer>
-          {this.viewState.expenseData?.map((data, index) => (
-            <SingleExpense
-              key={index}
-              id={data.id}
-              date={data.date}
-              name={data.name}
-              paidBy={data.paidBy}
-              state={data.state}
-              amount={data.amount}
-              onClick={this.viewState.reloadData}
-              splits={[]}
-            ></SingleExpense>
-          ))}
+          {this.viewState.expenseData?.length === 0 ? (
+            <h3>No Expenses Yet</h3>
+          ) : (
+            this.viewState.expenseData?.map((data, index) => (
+              <SingleExpense
+                key={index}
+                id={data.id}
+                date={data.date}
+                name={data.name}
+                paidBy={data.paidBy}
+                state={data.state}
+                amount={data.amount}
+                onClick={this.viewState.reloadData}
+                splits={[]}
+              ></SingleExpense>
+            ))
+          )}
         </ExpenseContainer>
       </Container>
     );

@@ -179,7 +179,7 @@ export class AddTaskViewState {
       assignee: this.newTask.assignee,
       startTime: this.newTask.startDate,
       rruleOption: rruleString,
-      lastCompleted: this.newTask,
+      lastCompleted: this.newTask.lastCompleted,
     };
 
     this.isLoading = true;
