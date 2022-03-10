@@ -35,6 +35,7 @@ export class Canvas extends React.Component<CanvasProps, CanvasState> {
       <Loading />
     ) : (
       <Container>
+        {this.viewState.isUpdating ? <Loading /> : null}
         <ToolSelectionContainer>
           <ColorPickerContainer>
             {Object.keys(COLORS).map((key) => {

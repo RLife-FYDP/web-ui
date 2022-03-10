@@ -9,6 +9,7 @@ export class CanvasViewState {
   private suiteId?: number;
   @observable canvasData?: string;
   @observable isLoading = false;
+  @observable isUpdating = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -38,15 +39,22 @@ export class CanvasViewState {
       canvas: data,
     };
 
+    this.updateState = true;
     await authenticatedRequestWithBody(
       `/suites/${this.suiteId}/update_canvas`,
       JSON.stringify(body),
       "PUT"
     );
+    this.updateState = false;
   }
 
   @action
   set newCanvasString(canvas: string) {
     this.canvasData = canvas;
+  }
+
+  @action
+  set updateState(state: boolean) {
+    this.isUpdating = state;
   }
 }
