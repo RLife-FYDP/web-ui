@@ -118,6 +118,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
                 <StyledSelect
                   displayEmpty
                   multiple
+                  disabled={!!newTask.id}
                   value={newTask.assignee ?? []}
                   onChange={(event) => {
                     const inputValue = event.target.value as string | string[];
