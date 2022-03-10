@@ -50,6 +50,7 @@ export class Expenses extends React.Component {
             this.viewState.expenseData?.map((data, index) => (
               <SingleExpense
                 key={index}
+                isDisabled={this.viewState.expenseFilterState === "all"}
                 id={data.id}
                 date={data.date}
                 name={data.name}
