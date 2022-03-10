@@ -156,6 +156,7 @@ const ComponentContainer = styled.div<{
     isNotificationsActive
       ? "calc(100% - 48px - 75px - 130px - 50px)"
       : "calc(100% - 48px - 75px - 50px)"};
+  overflow-y: scroll;
 `;
 
 const NavigationContainer = styled.div`

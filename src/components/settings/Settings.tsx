@@ -9,6 +9,7 @@ import {
   SignupPageUrl,
 } from "../../commonUtils/consts";
 import { Button } from "../common/Button";
+import ImageUpload from "../images/ImageUpload";
 import { EditableSelectedSetting } from "./EditableSelectedSetting";
 import { SettingsViewState } from "./SettingsViewState";
 
@@ -35,6 +36,17 @@ export class Settings extends Component {
             ))}
           </SectionContainer>
         ))}
+        <SectionContainer>
+          <Header>Edit Profile Photo</Header>
+          <ImageUpload
+              onImageUploaded={(url?: string) =>
+                this.viewState.updateSetting('Profile Image', url!)
+              }
+            />
+            {this.viewState.user?.profileImageLink ? (
+              <Image src={this.viewState.user.profileImageLink} />
+            ) : null}
+        </SectionContainer>
         <Button onClick={logout} text={"Logout"} />
       </Container>
     );
@@ -50,6 +62,7 @@ function logout() {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
 `;
 
 const SectionContainer = styled.div`
@@ -74,6 +87,10 @@ const SettingOptions = styled.div`
   align-items: baseline;
   margin: 2px 24px;
   padding: 2px 0;
+`;
+
+const Image = styled.img`
+  max-width: 100%;
 `;
 
 const SettingsTitle = styled.p`

@@ -46,6 +46,10 @@ export class SettingsViewState {
         this.user!.age = Number(newValue)
         this.updateSettingRequest({age: Number(newValue)})
         break;
+      case 'Profile Image':
+        this.user!.profileImageLink = newValue
+        this.updateSettingRequest({profileImageLink: newValue})
+        break;
       }
   }
 
