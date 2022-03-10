@@ -79,10 +79,9 @@ export const SignupForm: React.FC = () => {
                 await res.json();
               localStorage.setItem(AccessTokenStorageKey, accessToken);
               localStorage.setItem(RefreshTokenStorageKey, refreshToken);
-              window.location.href = window.location.href
-                .split("/")
-                .slice(0, -1)
-                .join("/")+'/create';
+              window.location.href =
+                window.location.href.split("/").slice(0, -1).join("/") +
+                "/create";
               break;
             default:
               const { message } = await res.json();
@@ -136,7 +135,7 @@ export const SignupForm: React.FC = () => {
             <StyledFormInput
               type="text"
               name="firstname"
-              label="Firstname"
+              label="First Name"
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.firstname}
@@ -144,7 +143,7 @@ export const SignupForm: React.FC = () => {
             <StyledFormInput
               type="text"
               name="lastname"
-              label="Lastname"
+              label="Last Name"
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.lastname}

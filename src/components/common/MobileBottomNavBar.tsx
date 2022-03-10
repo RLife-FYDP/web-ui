@@ -49,7 +49,7 @@ export class MobileBottomNavBar extends Component {
         <Route exact path="/tasks/add">
           {withAuthentication(AddTask)}
         </Route>
-        <Route path="/achievements">{withAuthentication(Achievements)}</Route>
+        {/* <Route path="/achievements">{withAuthentication(Achievements)}</Route> */}
         <Route exact path="/expenses">
           {withAuthentication(Expenses)}
         </Route>
@@ -81,12 +81,12 @@ export class MobileBottomNavBar extends Component {
             Tasks
           </NavItem>
         </StyledLink>
-        <StyledLink to="/achievements">
+        {/* <StyledLink to="/achievements">
           <NavItem>
             <AchievementIcon />
             Achievements
           </NavItem>
-        </StyledLink>
+        </StyledLink> */}
         <StyledLink to="/expenses">
           <NavItem>
             <ExpenseIcon />
@@ -101,7 +101,6 @@ export class MobileBottomNavBar extends Component {
         </StyledLink>
       </NavigationContainer>
     );
-
     return (
       <Router>
         <Container>
@@ -112,7 +111,9 @@ export class MobileBottomNavBar extends Component {
               <StickyContainer>
                 <MobileTopNavBar />
                 {this.notificationsViewState.isNotificationsVisible &&
-                !this.path.includes("settings") ? (
+                !(
+                  this.path.includes("settings") || this.path.includes("create")
+                ) ? (
                   <NotificationBar viewState={this.notificationsViewState} />
                 ) : null}
                 <ComponentContainer
@@ -123,7 +124,7 @@ export class MobileBottomNavBar extends Component {
                   {NavigationRouter}
                 </ComponentContainer>
               </StickyContainer>
-              {Navigation}
+              {!this.path.includes("create") && Navigation}
             </>
           )}
         </Container>

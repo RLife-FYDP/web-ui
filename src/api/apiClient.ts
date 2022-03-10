@@ -30,7 +30,6 @@ const refreshAccessToken = async (refreshToken: string) => {
 };
 
 export const authenticatedGetRequest = async (url: string) => {
-  console.log('authenticatedGetRequest')
   let accessToken = localStorage.getItem(AccessTokenStorageKey);
   const refreshToken = localStorage.getItem(RefreshTokenStorageKey);
   if (!refreshToken) {
@@ -55,7 +54,11 @@ export const authenticatedGetRequest = async (url: string) => {
   }
 };
 
-export const authenticatedRequestWithBody = async (url: string, body: string | FormData, method: string = 'POST') => {
+export const authenticatedRequestWithBody = async (
+  url: string,
+  body: string | FormData,
+  method: string = "POST"
+) => {
   let accessToken = localStorage.getItem(AccessTokenStorageKey);
   const refreshToken = localStorage.getItem(RefreshTokenStorageKey);
   if (!refreshToken) {
@@ -63,9 +66,9 @@ export const authenticatedRequestWithBody = async (url: string, body: string | F
     return;
   }
 
-  let headers : HeadersInit = { Authorization: `Bearer ${accessToken}`}
-  if (typeof body === 'string') {
-    headers['Content-Type'] = 'application/json'
+  let headers: HeadersInit = { Authorization: `Bearer ${accessToken}` };
+  if (typeof body === "string") {
+    headers["Content-Type"] = "application/json";
   }
   const res = await fetch(BASE_URL + url, {
     headers,
@@ -79,7 +82,7 @@ export const authenticatedRequestWithBody = async (url: string, body: string | F
       throw new Error("unable to refresh token");
     }
     accessToken = newAccessToken;
-    headers.Authorization = `Bearer ${accessToken}`
+    headers.Authorization = `Bearer ${accessToken}`;
     return fetch(BASE_URL + url, {
       headers,
       body,
@@ -88,7 +91,7 @@ export const authenticatedRequestWithBody = async (url: string, body: string | F
   } else {
     return res;
   }
-}
+};
 
 export const getUser = async () => {
   const accessToken = localStorage.getItem(AccessTokenStorageKey);
@@ -112,7 +115,11 @@ export const getUser = async () => {
     location: {}, //TODO
     profileImageLink: userJson.profile_img_link,
     rating: userJson.rating,
-    setting: {}, // TODO
+    setting: {
+      createdAt: userJson.setting?.created_at ?? userJson.created_at,
+      detailedSettingsJSON: userJson.setting?.setting ?? "{}",
+      id: userJson.setting?.id ?? userJson.id,
+    },
     suiteId: userJson.suite.id,
     updatedAt: new Date(userJson.updated_at),
   };

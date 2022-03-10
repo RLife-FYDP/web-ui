@@ -82,7 +82,7 @@ export class AddExpense extends Component {
                       min={0}
                       placeholder="0"
                       type="number"
-                      backgroundColor={split.color}
+                      backgroundColor={COLORS.Graphite}
                       value={split.amount === 0 ? "" : split.amount}
                       onChange={this.updateSplitAmountById}
                       onWheel={(event) => event.currentTarget.blur()}
@@ -94,8 +94,14 @@ export class AddExpense extends Component {
           </UserAmountInputContainer>
           <UploadImageContainer>
             <UserNameText>Upload receipt</UserNameText>
-            <ImageUpload onImageUploaded={(url?: string) => this.viewState.setNewExpenseValueByKey({receipt: url})}/>
-            {this.viewState.newExpense.receipt ? <Image src={this.viewState.newExpense.receipt} /> : null}
+            <ImageUpload
+              onImageUploaded={(url?: string) =>
+                this.viewState.setNewExpenseValueByKey({ receipt: url })
+              }
+            />
+            {this.viewState.newExpense.receipt ? (
+              <Image src={this.viewState.newExpense.receipt} />
+            ) : null}
           </UploadImageContainer>
           {this.viewState.newExpense.id ? (
             <StyledText onClick={this.viewState.deleteExpense}>
@@ -118,8 +124,8 @@ const Container = styled.div`
 `;
 
 const Image = styled.img`
-  max-width: 100%
-`
+  max-width: 100%;
+`;
 
 const UploadImageContainer = styled.div`
   margin: 8px 0;
@@ -207,7 +213,7 @@ const AmountContainer = styled.div<{
         ? "0"
         : Math.min(100, progressPercent * 100) + "%"};
     transition: width 0.3s linear;
-    background: ${({ color }) => (color == null ? "transparent" : color)};
+    background: ${({ color }) => (color == null ? COLORS.Orange : color)};
     border-radius: 5px;
   }
 `;

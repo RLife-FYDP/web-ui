@@ -27,6 +27,7 @@ interface ResponseProps {
   users: { id: number }[];
   start_time: string;
   rrule_option?: string;
+  last_completed?: string;
 }
 
 export class TaskViewState {
@@ -106,6 +107,7 @@ export class TaskViewState {
         ...task,
         startDate: new Date(task.start_time),
         assignee: task.users?.map((user) => user.id),
+        lastCompleted: task.last_completed,
         rruleOptions: {
           ...rrule,
           byweekday: Array.isArray(rrule.byweekday)

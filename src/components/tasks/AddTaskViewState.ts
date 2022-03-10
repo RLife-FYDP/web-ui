@@ -57,6 +57,7 @@ export interface SingleTaskProps {
   // start date should be mandatory
   startDate: Date;
   rruleOptions?: Options;
+  lastCompleted?: string;
 }
 
 interface ResponseProps {
@@ -169,7 +170,7 @@ export class AddTaskViewState {
     const rruleString = rule.toString();
     this.newTask.startDate.setHours(0, 0, 0, 0);
 
-    const body = JSON.stringify({
+    const body = {
       title: this.newTask.title,
       description: this.newTask.description,
       // TODO: temp tags
@@ -178,24 +179,21 @@ export class AddTaskViewState {
       assignee: this.newTask.assignee,
       startTime: this.newTask.startDate,
       rruleOption: rruleString,
-    });
+      lastCompleted: this.newTask,
+    };
 
     this.isLoading = true;
     if (this.newTask.id) {
       await authenticatedRequestWithBody(
         `/tasks/${this.newTask.id}`,
-        body,
+        JSON.stringify(body),
         "PUT"
       );
     } else {
-      await authenticatedRequestWithBody("/tasks/create", body);
+      await authenticatedRequestWithBody("/tasks/create", JSON.stringify(body));
     }
     this.isLoading = false;
 
     window.location.href = TaskPageUrl;
-
-    // console.log("rrule string: ", rule.toString());
-    // console.log("rrule description: ", rule.toText());
-    // console.log("rrule reaccurrances:", rule.all());
   }
 }

@@ -2,7 +2,11 @@ import axios from "axios";
 /* eslint-disable eqeqeq */
 import { action, computed, makeAutoObservable, observable } from "mobx";
 import RRule, { Frequency, Options } from "rrule";
-import { authenticatedGetRequest, authenticatedRequestWithBody, getUser } from "../../api/apiClient";
+import {
+  authenticatedGetRequest,
+  authenticatedRequestWithBody,
+  getUser,
+} from "../../api/apiClient";
 import { TaskPageUrl } from "../../commonUtils/consts";
 import { User } from "../../commonUtils/types";
 
@@ -50,10 +54,10 @@ export const RRuleFrequencies = [
 export const RRuleWeeklyIntervals = [1, 2, 3, 4];
 
 export interface SingleSuiteProps {
-  id?: number
-  name: string
-  address: string
-  users: Roommate[]
+  id?: number;
+  name: string;
+  address: string;
+  users: Roommate[];
 }
 
 interface ResponseProps {
@@ -63,9 +67,9 @@ interface ResponseProps {
 }
 
 export interface Roommate {
-  type: 'email' | 'user'
-  email?: string
-  userId?: number
+  type: "email" | "user";
+  email?: string;
+  userId?: number;
 }
 
 export function convertToUTC(localeDate: Date): Date {
@@ -85,14 +89,14 @@ export class CreateSuiteViewState {
   @observable newSuite: SingleSuiteProps = {
     name: "",
     address: "",
-    users: []
+    users: [],
   };
 
   @observable private roommateData?: ResponseProps[];
-  @observable matches: User[] = []
+  @observable matches: User[] = [];
   @observable isLoading: boolean = false;
-  @observable emailInputField: string = ''
-  private user?: User
+  @observable emailInputField: string = "";
+  private user?: User;
 
   constructor(taskToEdit?: SingleSuiteProps) {
     makeAutoObservable(this);
@@ -107,8 +111,10 @@ export class CreateSuiteViewState {
       `http://localhost:8080/suites/${this.user.suiteId}/users`
     );
     this.roommateData = response.data;
-    const res = await authenticatedGetRequest(`/matches/${this.user.id}/findMatches`)
-    const matches = await res!.json()
+    const res = await authenticatedGetRequest(
+      `/matches/${this.user.id}/findMatches`
+    );
+    const matches = await res!.json();
     this.matches = matches.map((matchedUser: any) => {
       const user: User = {
         age: matchedUser.age,
@@ -123,12 +129,11 @@ export class CreateSuiteViewState {
         location: {}, //TODO
         profileImageLink: matchedUser.profile_img_link,
         rating: matchedUser.rating,
-        setting: {}, // TODO
         suiteId: matchedUser.suite.id,
         updatedAt: new Date(matchedUser.updated_at),
       };
-      return user
-    })
+      return user;
+    });
   }
 
   @computed
@@ -144,23 +149,25 @@ export class CreateSuiteViewState {
   @action
   setEmailInputField = (newValue: string) => {
     this.emailInputField = newValue;
-  }
+  };
 
   @action
   addRoommateByEmail = (roommateEmail: string) => {
-    this.newSuite.users.push({type: 'email', email: roommateEmail})
-    this.setEmailInputField('')
-  }
+    this.newSuite.users.push({ type: "email", email: roommateEmail });
+    this.setEmailInputField("");
+  };
 
   @action
   addRoommateByUserIds = (userIds: number[]) => {
-    this.newSuite.users = this.newSuite.users.filter(roommate => roommate.type !== 'user').concat(userIds.map(userId => ({type: 'user', userId})))
-  }
+    this.newSuite.users = this.newSuite.users
+      .filter((roommate) => roommate.type !== "user")
+      .concat(userIds.map((userId) => ({ type: "user", userId })));
+  };
 
   @action
   deleteRoommateByIndex = (index: number) => {
-    this.newSuite.users.splice(index, 1)
-  }
+    this.newSuite.users.splice(index, 1);
+  };
 
   getNameById = (
     id: number,
@@ -191,19 +198,14 @@ export class CreateSuiteViewState {
   }
 
   private async submitSuiteToServer() {
-    const suite = {...this.newSuite}
-    suite.users = [...this.newSuite.users]
-    suite.users.push({type: 'user', userId: this.user?.id})
+    const suite = { ...this.newSuite };
+    suite.users = [...this.newSuite.users];
+    suite.users.push({ type: "user", userId: this.user?.id });
     const body = JSON.stringify(suite);
-    console.log(this.newSuite)
     this.isLoading = true;
     await authenticatedRequestWithBody("/suites/create", body);
     this.isLoading = false;
 
     window.location.href = TaskPageUrl;
-
-    // console.log("rrule string: ", rule.toString());
-    // console.log("rrule description: ", rule.toText());
-    // console.log("rrule reaccurrances:", rule.all());
   }
 }

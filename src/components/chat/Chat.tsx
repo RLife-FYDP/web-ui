@@ -7,6 +7,7 @@ import { Alignment, ChatBubble } from "./ChatBubble";
 
 import { ChatViewState } from "./ChatViewState";
 import { ReactComponent as SendIcon } from "../../icons/SendMessage.svg";
+import { Loading } from "../common/Loading";
 
 @observer
 export class Chat extends React.Component {
@@ -14,10 +15,13 @@ export class Chat extends React.Component {
   private viewState = new ChatViewState();
 
   renderOverview() {
-    return (
+    return this.viewState.isLoading ? (
+      <Loading />
+    ) : (
       <AllChatsContainer>
         {this.viewState.testData.map((data, i) => (
           <ChatContainer
+            key={i}
             onClick={() => {
               this.viewState.expandChat(data.chatId);
             }}
@@ -25,7 +29,13 @@ export class Chat extends React.Component {
             <ChatIcon />
             <MessageContainer>
               <ChatHead>{data.recipantName}</ChatHead>
-              <ChatMessage>{data.lastText.length > 30 ? `${data.lastText.substring(0,30)}...` : data.lastText}</ChatMessage>
+              <ChatMessage>
+                {data.lastText.length > 30
+                  ? `${data.lastText.substring(0, 30)}...`
+                  : data.lastText.length === 0
+                  ? "No messages"
+                  : data.lastText}
+              </ChatMessage>
             </MessageContainer>
           </ChatContainer>
         ))}
@@ -34,13 +44,18 @@ export class Chat extends React.Component {
   }
 
   renderSingleChat() {
-    const activeChat = this.viewState.testData.find(chats => chats.chatId === this.viewState.activeChatId);
+    const activeChat = this.viewState.testData.find(
+      (chats) => chats.chatId === this.viewState.activeChatId
+    );
     if (!activeChat) {
-      this.viewState.showChatOverview()
+      this.viewState.showChatOverview();
       return;
     }
 
-    const messages = (activeChat.chatId === 0 ? this.viewState.messages : this.viewState.userMessages[activeChat.recipientId ?? 0]) ?? []
+    const messages =
+      (activeChat.chatId === 0
+        ? this.viewState.messages
+        : this.viewState.userMessages[activeChat.recipientId ?? 0]) ?? [];
     return (
       <Container>
         <ContactNameContainer>
@@ -50,10 +65,13 @@ export class Chat extends React.Component {
           {activeChat.recipantName}
         </ContactNameContainer>
         <ConversationContainer>
-          {messages.map((data) => (
+          {messages.map((data, i) => (
             <ChatBubble
+              key={i}
               alignment={
-                data.senderId !== this.viewState.user?.id ? Alignment.LEFT : Alignment.RIGHT
+                data.senderId !== this.viewState.user?.id
+                  ? Alignment.LEFT
+                  : Alignment.RIGHT
               }
               text={data.text}
             />
@@ -61,19 +79,27 @@ export class Chat extends React.Component {
         </ConversationContainer>
 
         <MessageSenderContainer>
-          <MessageInput id='message-input' onChange={e => this.viewState.updateMessageTextInput(e.target.value)}/>
-          <SendIcon onClick={() => {
-            this.viewState.sendMessage(activeChat.recipientId)
-            const input = document.getElementById('message-input') as HTMLInputElement
-            input.value = ''
-          }} />
+          <MessageInput
+            id="message-input"
+            onChange={(e) =>
+              this.viewState.updateMessageTextInput(e.target.value)
+            }
+          />
+          <SendIcon
+            onClick={() => {
+              this.viewState.sendMessage(activeChat.recipientId);
+              const input = document.getElementById(
+                "message-input"
+              ) as HTMLInputElement;
+              input.value = "";
+            }}
+          />
         </MessageSenderContainer>
       </Container>
     );
   }
 
   render() {
-    console.log(this.viewState.suite?.users)
     return (
       <>
         {this.viewState.showSingleChat

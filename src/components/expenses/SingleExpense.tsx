@@ -71,6 +71,7 @@ const TableRow = styled.tr`
 `;
 
 const TableCell = styled.td<{ width: string }>`
+  padding-right: 8px;
   padding-bottom: 16px;
   width: ${({ width }) => width};
 `;

@@ -3,7 +3,11 @@ import { observer } from "mobx-react";
 import { Component } from "react";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
-import { AccessTokenStorageKey, RefreshTokenStorageKey, SignupPageUrl } from "../../commonUtils/consts";
+import {
+  AccessTokenStorageKey,
+  RefreshTokenStorageKey,
+  SignupPageUrl,
+} from "../../commonUtils/consts";
 import { Button } from "../common/Button";
 import { SettingsViewState } from "./SettingsViewState";
 
@@ -12,20 +16,23 @@ export class Settings extends Component {
   @observable private viewState = new SettingsViewState();
 
   render() {
+    if (this.viewState.testData === undefined) {
+      return null;
+    }
     return (
       <Container>
-        {this.viewState.testData.map((category) => (
-          <SectionContainer>
+        {this.viewState.testData.map((category, i) => (
+          <SectionContainer key={i}>
             <Header>{category.sectionName}</Header>
             {category.settings?.map((setting) => (
-              <SettingOptions>
+              <SettingOptions key={setting.name}>
                 <SettingsTitle>{setting.name}</SettingsTitle>
                 <SelectedSetting>{setting.selectedSetting}</SelectedSetting>
               </SettingOptions>
             ))}
           </SectionContainer>
         ))}
-        <Button onClick={logout} text={'Logout'}/>
+        <Button onClick={logout} text={"Logout"} />
       </Container>
     );
   }
@@ -33,8 +40,8 @@ export class Settings extends Component {
 
 function logout() {
   localStorage.removeItem(AccessTokenStorageKey);
-  localStorage.removeItem(RefreshTokenStorageKey)
-  window.location.href = SignupPageUrl
+  localStorage.removeItem(RefreshTokenStorageKey);
+  window.location.href = SignupPageUrl;
 }
 
 const Container = styled.div`

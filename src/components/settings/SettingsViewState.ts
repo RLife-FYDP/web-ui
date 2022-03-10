@@ -1,6 +1,8 @@
-import { computed, makeAutoObservable } from "mobx";
+import { User } from "./../../commonUtils/types";
+import { computed, makeAutoObservable, observable } from "mobx";
+import { getUser } from "../../api/apiClient";
 
-// TODO: currently just fake data to develop UI - will 
+// TODO: currently just fake data to develop UI - will
 // need to adjust for real data
 interface SingleSettingProps {
   name: string;
@@ -14,33 +16,38 @@ interface SettingsProps {
 }
 
 export class SettingsViewState {
+  @observable user?: User;
+
   constructor() {
     makeAutoObservable(this);
+    this.init();
+  }
+
+  async init() {
+    this.user = await getUser();
   }
 
   @computed
-  get testData(): SettingsProps[] {
+  get testData(): SettingsProps[] | undefined {
+    if (this.user == undefined) {
+      // eslint-disable-next-line getter-return
+      return;
+    }
+    const language = this.user?.setting?.detailedSettingsJSON
+      ? JSON.parse(this.user?.setting?.detailedSettingsJSON!).Spec.language
+      : "";
     return [
       {
-        sectionName: "Profile Settings",
+        sectionName: "Profile Information",
         settings: [
           {
             name: "Display Name",
-            selectedSetting: "Austin",
+            selectedSetting: `${this.user?.firstName} ${this.user?.lastName}`,
             availableOptions: ["Austin", "Marcus", "Lincoln", "Justin"],
           },
-        ],
-      },
-      {
-        sectionName: "History",
-        settings: [
           {
-            name: "Dec 2, 2021",
-            selectedSetting: "Blair House xxx",
-          },
-          {
-            name: "March 15, 2021",
-            selectedSetting: "Icon Suites xxx",
+            name: "Language",
+            selectedSetting: language,
           },
         ],
       },

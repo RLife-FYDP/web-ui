@@ -1,5 +1,7 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
+import COLORS from "../../commonUtils/colors";
 
 interface NotificationBubbleProps {
   backgroundColor: string;
@@ -14,19 +16,23 @@ export const NotificationBubble: React.FC<NotificationBubbleProps> = ({
   numNotifications,
   notificationType,
   icon,
-  onClickHandler
+  onClickHandler,
 }) => {
   return (
-    <Container backgroundColor={backgroundColor}
+    <Container
+      to="expenses"
+      backgroundColor={backgroundColor}
       onClick={onClickHandler}
     >
       <IconContainer src={icon} draggable={false} />
-      {numNotifications} new {notificationType}
+      <TextContainer>
+        {numNotifications} new {notificationType}
+      </TextContainer>
     </Container>
   );
 };
 
-const Container = styled.div<{
+const Container = styled(Link)<{
   backgroundColor: string;
 }>`
   display: flex;
@@ -43,6 +49,8 @@ const Container = styled.div<{
   border-radius: 25px;
   font-size: 14px;
   user-select: none;
+  text-decoration: none;
+  color: ${COLORS.Black};
 `;
 
 const IconContainer = styled.img`
@@ -50,4 +58,8 @@ const IconContainer = styled.img`
   height: auto;
   margin-right: 4px;
   padding: 4px;
+`;
+
+const TextContainer = styled.p`
+  padding: 0 4px;
 `;

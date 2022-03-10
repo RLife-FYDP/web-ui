@@ -45,6 +45,7 @@ interface UserMessages {
 }
 
 export class ChatViewState {
+  @observable isLoading = false;
   @observable private isSingleChatExpanded: boolean = false;
   @observable messages: ChatMessage[] = []
   @observable userMessages: UserMessages = {}
@@ -59,13 +60,14 @@ export class ChatViewState {
   constructor() {
     makeAutoObservable(this);
     this.socket = io("http://localhost:8080");
-    this.init()
+    this.init();
   }
 
   @action
   async init() {
     if (this.calls > 0) return;
     this.calls++;
+    this.isLoading = true;
     this.user = await getUser();
     generateSignalId(this.user.id) // asynchronously generate signal keys
     const resList = await Promise.all([authenticatedGetRequest(`/suites/${this.user.suiteId}`), authenticatedGetRequest(`/suites/${this.user.suiteId}/users`)])
@@ -81,7 +83,7 @@ export class ChatViewState {
       )),
     }
     this.suiteUsers = users;
-    
+    this.isLoading = false;
     this.messages = this.suite.messages?.sort((a,b) => a.dateTime.getTime() - b.dateTime.getTime()) ?? []
     this.socket.emit('join_room', this.user.suiteId)
 
@@ -166,7 +168,6 @@ export class ChatViewState {
 
   @action
   expandChat = (chatId: number) => {
-    console.log(`expanding chat ${chatId}`);
     this.isSingleChatExpanded = true;
     this.activeChatId = chatId;
   };

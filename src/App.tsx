@@ -10,7 +10,7 @@ const mediaQueries = new MediaQueries();
 const App = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      {mediaQueries.isMobile ? (
+      {mediaQueries.isTabletOrBelow ? (
         <MobileBottomNavBar />
       ) : (
         <div>PLEASE OPEN ON MOBILE</div>
