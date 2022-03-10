@@ -9,6 +9,7 @@ import {
   SignupPageUrl,
 } from "../../commonUtils/consts";
 import { Button } from "../common/Button";
+import { EditableSelectedSetting } from "./EditableSelectedSetting";
 import { SettingsViewState } from "./SettingsViewState";
 
 @observer
@@ -19,6 +20,7 @@ export class Settings extends Component {
     if (this.viewState.testData === undefined) {
       return null;
     }
+
     return (
       <Container>
         {this.viewState.testData.map((category, i) => (
@@ -27,7 +29,8 @@ export class Settings extends Component {
             {category.settings?.map((setting) => (
               <SettingOptions key={setting.name}>
                 <SettingsTitle>{setting.name}</SettingsTitle>
-                <SelectedSetting>{setting.selectedSetting}</SelectedSetting>
+                {setting.notEditable ? <SelectedSetting>{setting.selectedSetting}</SelectedSetting> :
+                  <EditableSelectedSetting text={setting.selectedSetting} onDoneEditing={(value) => this.viewState.updateSetting(setting.name, value)} />}
               </SettingOptions>
             ))}
           </SectionContainer>
@@ -80,4 +83,5 @@ const SettingsTitle = styled.p`
 
 const SelectedSetting = styled.p`
   color: ${COLORS.Gray};
+  padding-right: 28px;
 `;
