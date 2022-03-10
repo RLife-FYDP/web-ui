@@ -71,6 +71,22 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
     });
   };
 
+  handleSubmitNewTask = () => {
+    const { title, description, rruleOptions, startDate, assignee } =
+      this.viewState.newTask;
+
+    if (!title || !description || assignee.length === 0) {
+      return alert("Please fill out all the information");
+    }
+
+    if (this.state.isRepeatableEvent) {
+      if (!rruleOptions || !startDate) {
+        return alert("Please enter date information");
+      }
+    }
+    this.viewState.submitNewTask();
+  };
+
   render() {
     const { newTask } = this.viewState;
     return (
@@ -83,7 +99,7 @@ export class AddTask extends React.Component<AddTaskProps, AddTaskState> {
                 Cancel
               </StyledLink>
               <Header>New Task</Header>
-              <StyledText onClick={this.viewState.submitNewTask}>
+              <StyledText onClick={this.handleSubmitNewTask}>
                 {this.props.taskToEdit ? "Save" : "Add"}
               </StyledText>
             </HeaderContainer>

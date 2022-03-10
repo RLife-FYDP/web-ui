@@ -170,9 +170,9 @@ export class AddTaskViewState {
   private async submitTaskToServer() {
     const rule = new RRule(this.newTask.rruleOptions);
     const rruleString = rule.toString();
-    this.newTask.startDate.setHours(0, 0, 0, 0);
 
-    const body = {
+    this.newTask.startDate.setHours(0, 0, 0, 0);
+    const body: any = {
       title: this.newTask.title,
       description: this.newTask.description,
       // TODO: temp tags
@@ -186,6 +186,7 @@ export class AddTaskViewState {
 
     this.isLoading = true;
     if (this.newTask.id) {
+      body.isCompleted = 0;
       await authenticatedRequestWithBody(
         `/tasks/${this.newTask.id}`,
         JSON.stringify(body),
