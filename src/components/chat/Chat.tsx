@@ -65,17 +65,22 @@ export class Chat extends React.Component {
           {activeChat.recipantName}
         </ContactNameContainer>
         <ConversationContainer>
-          {messages.map((data, i) => (
-            <ChatBubble
-              key={i}
-              alignment={
-                data.senderId !== this.viewState.user?.id
-                  ? Alignment.LEFT
-                  : Alignment.RIGHT
-              }
-              text={data.text}
-            />
-          ))}
+          {messages.map((data, i) => {
+            const sender = this.viewState.suiteUsers?.find(user => user.id == data.senderId)
+            const senderName = `${sender?.first_name} ${sender?.last_name}`
+            return (
+              <ChatBubble
+                key={i}
+                alignment={
+                  data.senderId !== this.viewState.user?.id
+                    ? Alignment.LEFT
+                    : Alignment.RIGHT
+                }
+                senderName={senderName}
+                text={data.text}
+              />
+            )
+          })}
         </ConversationContainer>
 
         <MessageSenderContainer>
