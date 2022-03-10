@@ -60,12 +60,6 @@ export interface SingleSuiteProps {
   users: Roommate[];
 }
 
-interface ResponseProps {
-  first_name: string;
-  last_name: string;
-  id: number;
-}
-
 export interface Roommate {
   type: "email" | "user";
   email?: string;
@@ -122,7 +116,7 @@ export class CreateSuiteViewState {
         location: {}, //TODO
         profileImageLink: matchedUser.profile_img_link,
         rating: matchedUser.rating,
-        suiteId: matchedUser.suite.id,
+        suiteId: matchedUser.suite?.id,
         updatedAt: new Date(matchedUser.updated_at),
       };
       return user;
