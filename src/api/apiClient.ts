@@ -120,7 +120,7 @@ export const getUser = async () => {
       detailedSettingsJSON: userJson.setting?.setting ?? "{}",
       id: userJson.setting?.id ?? userJson.id,
     },
-    suiteId: userJson.suite.id,
+    suiteId: userJson.suite?.id,
     updatedAt: new Date(userJson.updated_at),
   };
   return user;
