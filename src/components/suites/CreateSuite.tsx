@@ -107,10 +107,10 @@ export class CreateSuite extends React.Component {
           );
         }}
       >
-        {this.viewState.matches.map(matchedUser => (
+        {this.viewState.matches.map((matchedUser, i) => (
           <MenuItem key={matchedUser.id} value={matchedUser.id} >
             <Checkbox checked={newSuite.users.some(addedUser => addedUser.userId === matchedUser.id)} />
-            <ListItemText primary={`${matchedUser.firstName} ${matchedUser.lastName}`} />
+            <ListItemText primary={`${i+1}. ${matchedUser.firstName} ${matchedUser.lastName}`} />
           </MenuItem>
         ))}
       </StyledSelect>
