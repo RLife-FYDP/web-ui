@@ -1,18 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import COLORS from "../../commonUtils/colors";
 
 interface CheckboxProps {
   onClick: () => void;
   isDisabled?: boolean;
+  defaultChecked?: boolean;
 }
 
-export const Checkbox: React.FC<CheckboxProps> = ({ onClick, isDisabled }) => {
+export const Checkbox: React.FC<CheckboxProps> = ({
+  onClick,
+  isDisabled,
+  defaultChecked,
+}) => {
   const [isChecked, toggleChecked] = useState(false);
+
+  useEffect(() => {
+    toggleChecked(defaultChecked ?? false);
+  }, [defaultChecked]);
 
   return (
     <Container
-      isChecked={isChecked || !!isDisabled}
+      isDisabled={isDisabled}
+      isChecked={isChecked}
       onClick={() => {
         if (isDisabled) {
           return;
@@ -26,6 +36,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({ onClick, isDisabled }) => {
 
 const Container = styled.div<{
   isChecked: Boolean;
+  isDisabled?: Boolean;
 }>`
   position: relative;
   width: 25px;
@@ -51,6 +62,7 @@ const Container = styled.div<{
   }
 
   &:hover:after {
-    background: ${COLORS.NavyBlue};
+    background: ${({ isDisabled }) =>
+      isDisabled ? "transparent" : COLORS.NavyBlue};
   }
 `;

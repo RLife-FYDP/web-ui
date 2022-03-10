@@ -9,11 +9,12 @@ import { authenticatedRequestWithBody } from "../../api/apiClient";
 
 interface SingleExpenseViewProps {
   onClick: () => void;
+  isDisabled?: boolean;
 }
 
 export const SingleExpense: React.FC<
   SingleExpenseProps & SingleExpenseViewProps
-> = ({ id, date, name, paidBy, state, amount, onClick }) => {
+> = ({ id, date, name, paidBy, state, amount, onClick, isDisabled }) => {
   const month = date.toLocaleString("default", { month: "short" });
   const day = date.getDate();
 
@@ -33,7 +34,11 @@ export const SingleExpense: React.FC<
   return (
     <TableRow>
       <TableCell width="10%">
-        <Checkbox onClick={onClickCompleteHandler} />
+        <Checkbox
+          onClick={onClickCompleteHandler}
+          isDisabled={!!isDisabled}
+          defaultChecked={!!state}
+        />
       </TableCell>
       <TableCell width="15%">
         <CreatedDateContainer>
