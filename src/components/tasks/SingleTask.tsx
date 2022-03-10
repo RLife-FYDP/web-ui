@@ -9,6 +9,7 @@ import { ReactComponent as RepeatIcon } from "../../icons/RepeatIcon.svg";
 interface SingleTaskViewProps {
   id: number;
   assigneeNames?: string[];
+  isToggleDisabled?: boolean;
   onClick: (id: number) => void;
   onClickComplete: (id: number) => void;
 }
@@ -19,6 +20,7 @@ export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
   assigneeNames,
   rruleOptions,
   onClick,
+  isToggleDisabled,
   onClickComplete,
 }) => {
   let namesToShow =
@@ -32,6 +34,7 @@ export const SingleTask: React.FC<SingleTaskProps & SingleTaskViewProps> = ({
     <Container>
       <InformationContainer>
         <Checkbox
+          isDisabled={isToggleDisabled}
           onClick={() => {
             onClickComplete(id);
           }}

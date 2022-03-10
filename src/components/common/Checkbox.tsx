@@ -4,15 +4,24 @@ import COLORS from "../../commonUtils/colors";
 
 interface CheckboxProps {
   onClick: () => void;
+  isDisabled?: boolean;
 }
 
-export const Checkbox: React.FC<CheckboxProps> = ({ onClick }) => {
+export const Checkbox: React.FC<CheckboxProps> = ({ onClick, isDisabled }) => {
   const [isChecked, toggleChecked] = useState(false);
 
-  return <Container isChecked={isChecked} onClick={() => {
-    toggleChecked(!isChecked)
-    onClick()
-  }}></Container>;
+  return (
+    <Container
+      isChecked={isChecked || !!isDisabled}
+      onClick={() => {
+        if (isDisabled) {
+          return;
+        }
+        toggleChecked(!isChecked);
+        onClick();
+      }}
+    ></Container>
+  );
 };
 
 const Container = styled.div<{

@@ -62,21 +62,21 @@ export class Tasks extends React.Component<{}, TasksState> {
         {tasks == undefined ? (
           <Loading />
         ) : this.state.isEditState == undefined ? (
-          tasks.length === 0 ? (
-            <h3>No Tasks Yet</h3>
-          ) : (
-            <>
-              <ToggleButtonGroup
-                exclusive
-                value={this.viewState.taskViewFilter}
-                onChange={this.toggleTaskListFilter}
-              >
-                <StyledToggleButton value="incomplete">
-                  Show incomplete
-                </StyledToggleButton>
-                <StyledToggleButton value="all">Show all</StyledToggleButton>
-              </ToggleButtonGroup>
-              {tasks.map((data, index) => {
+          <>
+            <ToggleButtonGroup
+              exclusive
+              value={this.viewState.taskViewFilter}
+              onChange={this.toggleTaskListFilter}
+            >
+              <StyledToggleButton value="incomplete">
+                Show incompleted
+              </StyledToggleButton>
+              <StyledToggleButton value="complete">Show completed</StyledToggleButton>
+            </ToggleButtonGroup>
+            {tasks.length === 0 ? (
+              <h3>No Tasks Yet</h3>
+            ) : (
+              tasks.map((data, index) => {
                 const header =
                   data.taskSection < today
                     ? "Overdue"
@@ -93,6 +93,7 @@ export class Tasks extends React.Component<{}, TasksState> {
                           rruleOptions={details.rruleOptions}
                           startDate={details.startDate}
                           assignee={details.assignee}
+                          isToggleDisabled={this.viewState.taskViewFilter === "complete"}
                           assigneeNames={details.assignee.map(
                             (id) =>
                               this.addTaskViewState.getNameById(id, false) ?? ""
@@ -104,9 +105,9 @@ export class Tasks extends React.Component<{}, TasksState> {
                     })}
                   </SectionContainer>
                 );
-              })}
-            </>
-          )
+              })
+            )}
+          </>
         ) : (
           <AddTask
             taskToEdit={this.viewState.getTaskDetailsById(

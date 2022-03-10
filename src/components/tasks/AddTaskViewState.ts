@@ -58,6 +58,8 @@ export interface SingleTaskProps {
   startDate: Date;
   rruleOptions?: Options;
   lastCompleted?: string;
+  // 0 for false, 1 for true
+  isCompleted?: number;
 }
 
 interface ResponseProps {
